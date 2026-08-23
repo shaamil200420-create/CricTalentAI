@@ -1,0 +1,168 @@
+/* =========================================================
+   PHASE 2 — LOGIN DESIGN CORRECTION ONLY.
+   Visual source of truth: the ORIGINAL E:\CricTalentAI\Login.html
+   prototype (its own distinct dark hero + light form-panel design —
+   deliberately different from the couch.html system used elsewhere).
+   CSS-only: every class below is already rendered by the current
+   Login.jsx; nothing was added, removed, or renamed. Where the old
+   prototype used markup this page doesn't have (a rotating radar
+   graphic, a decorative bottom seam, a pill-shaped eyebrow dot),
+   those are reproduced with background-image data-URI SVGs and
+   pseudo-elements so no JSX changes were needed.
+   ========================================================= */
+
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(420px, 1fr) minmax(440px, 1fr);
+  background: var(--bg);
+}
+
+/* ---------- Hero panel (always a dark gradient, in both app themes) ---------- */
+.login-hero {
+  padding: 48px 56px 34px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  color: #eef6f1;
+  background:
+    radial-gradient(900px 500px at 85% -10%, rgba(78, 222, 163, .35), transparent 60%),
+    linear-gradient(165deg, #003524 0%, #00583c 38%, #0a3a52 78%, #062337 100%);
+}
+:root[data-theme='dark'] .login-hero {
+  background:
+    radial-gradient(900px 500px at 85% -10%, rgba(78, 222, 163, .25), transparent 60%),
+    linear-gradient(165deg, #021910 0%, #02301f 40%, #051c2c 80%, #020a16 100%);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-theme='dark']) .login-hero {
+    background:
+      radial-gradient(900px 500px at 85% -10%, rgba(78, 222, 163, .25), transparent 60%),
+      linear-gradient(165deg, #021910 0%, #02301f 40%, #051c2c 80%, #020a16 100%);
+  }
+}
+
+/* decorative rotating radar graphic — reproduces the prototype's animated
+   sweep purely via a background-image data URI on a pseudo-element */
+.login-hero::before {
+  content: '';
+  position: absolute;
+  top: -170px;
+  right: -220px;
+  width: clamp(560px, 56vw, 860px);
+  height: clamp(560px, 56vw, 860px);
+  pointer-events: none;
+  opacity: .65;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 520 520'%3E%3Ccircle cx='260' cy='260' r='220' stroke='white' stroke-opacity='.14' fill='none'/%3E%3Ccircle cx='260' cy='260' r='160' stroke='white' stroke-opacity='.16' fill='none'/%3E%3Ccircle cx='260' cy='260' r='100' stroke='white' stroke-opacity='.18' fill='none'/%3E%3Ccircle cx='260' cy='260' r='40' stroke='white' stroke-opacity='.22' fill='none'/%3E%3Cpath d='M260 260 L260 40 A220 220 0 0 1 411 109 Z' fill='%234edea3' fill-opacity='.32'/%3E%3Ccircle cx='260' cy='260' r='5' fill='%23ffb95f'/%3E%3Ccircle cx='360' cy='190' r='5.5' fill='white'/%3E%3Ccircle cx='195' cy='330' r='4.5' fill='white' fill-opacity='.85'/%3E%3Ccircle cx='330' cy='350' r='4' fill='white' fill-opacity='.7'/%3E%3Ccircle cx='180' cy='170' r='4' fill='white' fill-opacity='.6'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  transform-origin: center;
+  animation: login-radar-spin 9s linear infinite;
+}
+@keyframes login-radar-spin { to { transform: rotate(360deg); } }
+
+/* decorative dashed seam at the hero's bottom edge */
+.login-hero::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 30px;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 30' preserveAspectRatio='none'%3E%3Cpath d='M0 6 Q 270 26 540 6' stroke='%23ffb95f' stroke-opacity='.5' stroke-width='1.4' fill='none' stroke-dasharray='1 7' stroke-linecap='round'/%3E%3Cpath d='M0 11 Q 270 31 540 11' stroke='%23ffb95f' stroke-opacity='.3' stroke-width='1.4' fill='none' stroke-dasharray='1 7' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-size: 100% 100%;
+}
+
+.login-hero-top { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; margin-bottom: 46px; }
+.login-brand { display: flex; align-items: center; gap: 16px; font-weight: 800; font-size: 16px; }
+.login-brand .sidebar-brand-mark {
+  width: 56px; height: 56px; border-radius: 14px; flex: 0 0 56px;
+  background: linear-gradient(135deg, #10b981, #0a6b4b);
+  color: #00422b; font-size: 19px; font-weight: 900;
+  box-shadow: 0 8px 20px rgba(16, 185, 129, .35);
+}
+.login-brand span { font-size: 25px; font-weight: 800; letter-spacing: -.01em; line-height: 1.1; color: #fff; }
+
+/* theme toggle sits against the dark hero here, so give it a translucent
+   glass treatment instead of the default light icon-btn chrome */
+.login-hero-top .icon-btn {
+  background: rgba(255, 255, 255, .08);
+  border-color: rgba(255, 255, 255, .18);
+  color: #eef6f1;
+  backdrop-filter: blur(8px);
+}
+.login-hero-top .icon-btn:hover { background: rgba(255, 255, 255, .16); border-color: rgba(255, 255, 255, .3); color: #fff; }
+
+.login-eyebrow {
+  position: relative; z-index: 2;
+  display: inline-flex; align-items: center; gap: 7px; width: fit-content;
+  padding: 6px 13px 6px 11px; border-radius: 999px;
+  background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .16);
+  font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+  color: #bfe8d3; backdrop-filter: blur(8px); font-family: var(--font-sans);
+  margin-bottom: 0;
+}
+.login-eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #ffb95f; flex: 0 0 6px; }
+
+.login-headline {
+  position: relative; z-index: 2;
+  font-size: clamp(32px, 3.6vw, 44px); font-weight: 800; line-height: 1.08; letter-spacing: -.02em;
+  margin: 20px 0 16px; max-width: none; color: #fff;
+}
+.login-headline em {
+  font-style: normal;
+  background: linear-gradient(100deg, #ffd699, #ffb95f 60%, #ff9d3f);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #ffb95f;
+}
+.login-copy { position: relative; z-index: 2; max-width: 380px; color: #cfe6db; font-size: 15px; line-height: 1.65; margin-bottom: 0; }
+
+.login-stats { position: relative; z-index: 2; display: flex; gap: 34px; flex-wrap: wrap; margin-top: auto; padding: 28px 0 0; }
+.login-stat-num { font-family: var(--font-sans); font-size: 25px; font-weight: 800; color: #fff; letter-spacing: -.01em; }
+.login-stat-label { font-size: 9.5px; letter-spacing: .14em; color: #8fc9af; text-transform: uppercase; margin-top: 3px; max-width: 16ch; font-weight: 600; }
+.login-stats-note { position: relative; z-index: 2; font-size: 11px; color: rgba(238, 246, 241, .5); font-style: italic; max-width: 48ch; margin-top: 10px; }
+
+/* ---------- Form panel (light card, adapts with the app theme) ---------- */
+.login-panel { display: flex; align-items: center; justify-content: center; padding: 40px 32px; background: var(--surface); border-left: none; position: relative; }
+.login-card { width: 100%; max-width: 420px; margin: auto; padding: 8px 0; }
+.login-card-head h2 { font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1.18; margin-bottom: 10px; }
+.login-card-head .text-muted { line-height: 1.6; }
+.login-form { display: flex; flex-direction: column; gap: 20px; margin: 22px 0 6px; }
+
+.login-panel .field label { font-family: var(--font-sans); letter-spacing: .1em; }
+.login-panel .input {
+  background: var(--surface-alt);
+  border: 1.5px solid transparent;
+  border-radius: 10px;
+  padding: 13px 14px;
+  font-size: 14.5px;
+}
+.login-panel .input:focus {
+  background: var(--surface);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(var(--color-primary-rgb), .18);
+}
+.login-panel .input-affix-btn { border-radius: 8px; }
+.login-panel .input-affix-btn:hover { background: var(--surface-alt); color: var(--color-primary); }
+
+.login-panel .btn-primary {
+  padding: 14px 18px; font-size: 14.5px; border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(16, 185, 129, .28);
+}
+.login-panel .btn-primary:hover:not(:disabled) { box-shadow: 0 14px 30px rgba(16, 185, 129, .36); }
+
+.login-divider { display: flex; align-items: center; gap: 10px; margin: 24px 0 16px; color: var(--text-faint); font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; font-family: var(--font-mono); }
+.login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.login-demo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.login-demo-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 13px 8px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--surface-alt); color: var(--text-muted); font-size: 11.5px; font-weight: 700;
+  cursor: pointer; transition: border-color .15s ease, color .15s ease, transform .15s ease;
+}
+.login-demo-btn:hover { border-color: rgba(var(--color-primary-rgb), .4); color: var(--color-primary); transform: translateY(-1px); }
+.login-footnote { font-size: 11.5px; color: var(--text-faint); margin-top: 22px; line-height: 1.6; text-align: center; }
+
+@media (max-width: 880px) {
+  .login-page { grid-template-columns: 1fr; }
+  .login-hero { display: none; }
+  .login-panel { padding: 60px 16px; }
+}

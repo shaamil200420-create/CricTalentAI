@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CricTalentAI – Player Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    darkMode:"class",
+    theme:{
+      extend:{
+        colors:{
+          "primary":"#006c49","on-primary":"#ffffff","primary-container":"#10b981","on-primary-container":"#00422b",
+          "primary-fixed":"#6ffbbe","primary-fixed-dim":"#4edea3","inverse-primary":"#4edea3",
+          "secondary":"#565e74","on-secondary":"#ffffff","secondary-container":"#dae2fd","on-secondary-container":"#5c647a",
+          "tertiary":"#505f76","tertiary-container":"#94a4bd","on-tertiary-container":"#2a3a4f",
+          "surface":"#f7f9fb","surface-dim":"#d8dadc","surface-bright":"#f7f9fb",
+          "surface-container-lowest":"#ffffff","surface-container-low":"#f2f4f6","surface-container":"#eceef0",
+          "surface-container-high":"#e6e8ea","surface-container-highest":"#e0e3e5",
+          "on-surface":"#191c1e","on-surface-variant":"#3c4a42","outline":"#6c7a71","outline-variant":"#bbcabf",
+          "error":"#ba1a1a","error-container":"#ffdad6","on-error":"#ffffff",
+          "background":"#f7f9fb","on-background":"#191c1e","surface-tint":"#006c49",
+          "inverse-surface":"#2d3133","inverse-on-surface":"#eff1f3",
+        }
+      }
+    }
+  }
+</script>
+<style>
+  *{box-sizing:border-box;}
+  body{font-family:'Inter',sans-serif;background:#f7f9fb;color:#191c1e;transition:background .3s,color .3s;}
+  .dark body{background:#060a14;color:#f0f4ff;}
+
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;}
+  .fill-icon{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;}
+
+  .ultra-glass{background:rgba(255,255,255,0.8);backdrop-filter:blur(20px);border:1px solid rgba(0,0,0,0.05);transition:all .3s;}
+  .dark .ultra-glass{background:rgba(19,27,46,0.8);border:1px solid rgba(255,255,255,0.05);}
+
+  .gradient-text{background:linear-gradient(135deg,#006c49,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .dark .gradient-text{background:linear-gradient(135deg,#00ff9d,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+
+  .nav-active{background:linear-gradient(90deg,rgba(16,185,129,.12) 0%,transparent 100%);border-left:3px solid #006c49;}
+  .dark .nav-active{background:linear-gradient(90deg,rgba(0,255,157,.12) 0%,transparent 100%);border-left-color:#00ff9d;}
+  a.nav-active{color:#006c49!important;font-weight:800;}
+  .dark a.nav-active{color:#00ff9d!important;}
+
+  .portal-page{display:none;}
+  .portal-page.active{display:block;}
+
+  /* dark overrides — aligned to Admin Dashboard dark-mode palette */
+  .dark .bg-white,.dark .bg-surface-container-lowest{background:#0d1425!important;}
+  .dark .bg-surface,.dark .bg-surface\/80{background:#060a14!important;}
+  .dark .bg-surface-container-low{background:#151f34!important;}
+  .dark .bg-surface-container-high,.dark .bg-surface-container-highest{background:#1b2740!important;}
+  .dark .text-on-surface{color:#f0f4ff!important;}
+  .dark .text-on-surface-variant{color:#a9b8c0!important;}
+  .dark .text-on-surface-variant\/60{color:#a9b8c0!important;}
+  .dark .text-on-surface-variant\/50{color:#94a3ad!important;}
+  .dark .text-on-surface-variant\/40{color:#7f90a0!important;}
+  .dark .text-on-surface-variant\/70{color:#a9b8c0!important;}
+  .dark .border-outline-variant\/30{border-color:rgba(255,255,255,.08)!important;}
+  .dark .border-outline-variant\/20{border-color:rgba(255,255,255,.05)!important;}
+  .dark .border-outline-variant\/10{border-color:rgba(255,255,255,.05)!important;}
+  .dark .text-primary{color:#00ff9d!important;}
+  .dark .text-secondary{color:#00d4ff!important;}
+  .dark .text-tertiary{color:#ffb95f!important;}
+  .dark .text-error{color:#ff5a5a!important;}
+  .dark .bg-primary\/5{background:rgba(0,255,157,.08)!important;}
+  .dark .bg-primary\/10{background:rgba(0,255,157,.1)!important;}
+  .dark .border-primary\/20{border-color:rgba(0,255,157,.24)!important;}
+  .dark .bg-secondary\/5{background:rgba(0,212,255,.08)!important;}
+  .dark .bg-secondary\/10{background:rgba(0,212,255,.1)!important;}
+  .dark .border-secondary\/20{border-color:rgba(0,212,255,.24)!important;}
+  .dark .bg-tertiary\/5{background:rgba(255,185,95,.08)!important;}
+  .dark .bg-tertiary\/10{background:rgba(255,185,95,.1)!important;}
+  .dark .border-tertiary\/20{border-color:rgba(255,185,95,.25)!important;}
+  .dark .bg-error\/5{background:rgba(255,90,90,.08)!important;}
+  .dark .bg-error\/10{background:rgba(255,90,90,.1)!important;}
+  .dark .border-error\/10{border-color:rgba(255,90,90,.15)!important;}
+  .dark .bg-error-container\/20{background:rgba(255,90,90,.08)!important;}
+  .dark .divide-outline-variant\/10>*{border-color:rgba(255,255,255,.05)!important;}
+  .dark .hover\:bg-surface-container-low:hover{background:rgba(255,255,255,.05)!important;}
+  .dark .bg-primary-container{background:rgba(0,255,157,.15)!important;}
+  .dark .text-on-primary-container{color:#00ff9d!important;}
+  .dark .ultra-glass{background:rgba(6,10,20,.86)!important;border-color:rgba(255,255,255,.05)!important;}
+  .dark aside{background:#02040a!important;border-color:rgba(255,255,255,.05)!important;}
+  .dark .border-outline-variant\/30.border-r{border-color:rgba(255,255,255,.05)!important;}
+
+  .skill-fill{transition:width .9s cubic-bezier(.4,0,.2,1);}
+  .prog-ring{transition:stroke-dashoffset 1s cubic-bezier(.4,0,.2,1);}
+
+  .goal-bar{height:6px;border-radius:100px;background:#eceef0;overflow:hidden;}
+  .dark .goal-bar{background:#1b2740;}
+  .goal-bar-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,#006c49,#10b981);}
+
+  html{scroll-behavior:smooth;}
+
+  /* ── Mobile / tablet responsiveness (below 900px only) ── */
+  #sidebar-overlay{display:none;}
+  #hamburger-btn{display:none;}
+
+  @media (max-width:899px){
+    aside{
+      transform:translateX(-100%);
+      transition:transform .25s ease;
+      z-index:70;
+    }
+    aside.sidebar-open{transform:translateX(0);}
+
+    #sidebar-overlay{
+      display:block;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.5);
+      z-index:60;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .25s ease;
+    }
+    #sidebar-overlay.overlay-visible{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    main{margin-left:0!important;}
+
+    header{padding-left:1.25rem;padding-right:1.25rem;}
+    header .px-10{padding-left:1.25rem;padding-right:1.25rem;}
+
+    #hamburger-btn{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:2.75rem;
+      height:2.75rem;
+      border-radius:1rem;
+      margin-right:.75rem;
+    }
+
+    .px-10{padding-left:1.25rem!important;padding-right:1.25rem!important;}
+
+    table{min-width:640px;}
+  }
+</style>
+</head>
+<body class="flex min-h-screen overflow-x-hidden">
+
+<!-- ─── Sidebar ─── -->
+<aside class="w-[256px] fixed left-0 top-0 h-full bg-surface-container-lowest border-r border-outline-variant/30 flex flex-col py-8 px-5 z-50 transition-colors">
+  <div class="flex items-center gap-3 mb-10 px-2">
+    <div class="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center flex-shrink-0">
+      <span class="material-symbols-outlined fill-icon text-on-primary-container text-xl">sports_cricket</span>
+    </div>
+    <div>
+      <h1 class="text-lg font-black gradient-text leading-none tracking-tight">CricTalentAI</h1>
+      <p class="text-[9px] tracking-[.12em] uppercase text-on-surface-variant mt-0.5 font-mono">U19 Cricket Academy</p>
+    </div>
+  </div>
+
+  <nav class="flex-1 space-y-0.5 overflow-y-auto">
+    <a href="#" data-target="dashboard" data-title="Player Dashboard" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-all text-sm">
+      <span class="material-symbols-outlined text-xl">dashboard</span> Dashboard
+    </a>
+    <a href="#" data-target="profile" data-title="My Profile" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-all text-sm">
+      <span class="material-symbols-outlined text-xl">person</span> My Profile
+    </a>
+    <a href="#" data-target="match-stats" data-title="My Match Stats" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-all text-sm">
+      <span class="material-symbols-outlined text-xl">bar_chart</span> My Match Stats
+    </a>
+    <a href="#" data-target="training" data-title="My Training Records" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-all text-sm">
+      <span class="material-symbols-outlined text-xl">fitness_center</span> My Training Records
+    </a>
+    <a href="#" data-target="schedule" data-title="My Schedule" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-all text-sm">
+      <span class="material-symbols-outlined text-xl">event_note</span> My Schedule
+    </a>
+    <a href="#" data-target="goals" data-title="My Goals" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-all text-sm">
+      <span class="material-symbols-outlined text-xl">flag</span> My Goals
+    </a>
+    <a href="#" data-target="feedback" data-title="My Feedback" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-all text-sm">
+      <span class="material-symbols-outlined text-xl">forum</span> My Feedback
+    </a>
+    <a href="#" data-target="report" data-title="My Development Report" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-all text-sm">
+      <span class="material-symbols-outlined text-xl">description</span> My Development Report
+    </a>
+    <a href="#" data-target="progress" data-title="My Training Progress Status" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-all text-sm">
+      <span class="material-symbols-outlined text-xl">monitoring</span> My Training Progress Status
+    </a>
+  </nav>
+
+  <div class="pt-5 border-t border-outline-variant/20 space-y-0.5">
+    <a href="#" id="logout-link" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-on-surface-variant hover:text-error transition-all text-sm">
+      <span class="material-symbols-outlined text-xl">logout</span> Logout
+    </a>
+  </div>
+</aside>
+
+<!-- ─── Mobile sidebar overlay (below 900px only) ─── -->
+<div id="sidebar-overlay"></div>
+
+<!-- ─── Main ─── -->
+<main class="ml-[256px] flex-1 flex flex-col min-h-screen">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 ultra-glass flex justify-between items-center px-10 py-5 border-b border-outline-variant/10">
+    <div class="flex items-center">
+      <button id="hamburger-btn" class="ultra-glass text-on-surface-variant hover:border-primary/40 transition-all" aria-label="Open menu">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <div>
+        <h2 id="page-title" class="text-3xl font-black text-on-surface">Player Dashboard</h2>
+        <div class="flex items-center gap-3 mt-1">
+          <span class="flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 rounded-md border border-primary/20 text-[10px] font-black text-primary uppercase tracking-widest">
+            <span class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span> Season 2025–26 Active
+          </span>
+          <span class="text-on-surface-variant/40">|</span>
+          <span class="text-xs text-on-surface-variant font-mono uppercase">U19 Elite Division · T20 Format</span>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <button id="theme-toggle" class="w-11 h-11 ultra-glass flex items-center justify-center rounded-2xl hover:border-primary/40 transition-all text-on-surface-variant">
+        <span class="material-symbols-outlined fill-icon block dark:hidden">dark_mode</span>
+        <span class="material-symbols-outlined fill-icon hidden dark:block">light_mode</span>
+      </button>
+      <div class="flex items-center gap-3 pl-5 border-l border-outline-variant/30">
+        <div class="text-right">
+          <p class="font-black text-on-surface text-sm">Kasun Perera</p>
+          <p class="text-[10px] text-primary font-black uppercase tracking-tight">Player Account</p>
+        </div>
+        <div class="w-12 h-12 rounded-2xl p-0.5 bg-primary-container">
+          <div class="w-full h-full rounded-[14px] bg-surface-container-highest flex items-center justify-center text-lg font-black text-primary">KP</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Body -->
+  <div class="px-10 py-7 space-y-7 pb-16">
+
+    <!-- ════════════════════ PAGE: Dashboard ════════════════════ -->
+    <div id="page-dashboard" class="portal-page active space-y-7">
+
+      <!-- Profile summary -->
+      <section class="bg-surface-container-lowest rounded-[2rem] p-8 border border-outline-variant/30 relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-6 opacity-[0.04] pointer-events-none select-none">
+          <span class="material-symbols-outlined fill-icon text-[180px] text-primary">sports_cricket</span>
+        </div>
+        <div class="flex flex-wrap items-start gap-8">
+          <div class="relative">
+            <div class="w-24 h-24 rounded-[1.5rem] bg-primary-container flex items-center justify-center text-4xl font-black text-on-primary-container">KP</div>
+            <span class="absolute -bottom-2 -right-2 px-2 py-0.5 bg-primary text-white text-[9px] font-black rounded-full uppercase">P001</span>
+          </div>
+          <div class="flex-1 min-w-[200px]">
+            <h3 class="text-3xl font-black text-on-surface">Kasun Perera</h3>
+            <p class="text-on-surface-variant mt-0.5">Batter</p>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <span class="px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-[10px] font-black rounded-md uppercase">U-19</span>
+              <span class="px-3 py-1 bg-secondary/10 border border-secondary/20 text-secondary text-[10px] font-black rounded-md uppercase">T20 Format</span>
+              <span class="px-3 py-1 bg-tertiary/10 border border-tertiary/20 text-tertiary text-[10px] font-black rounded-md uppercase">Power Hitter</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-5">
+              <div><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60">Player ID</p><p class="font-mono font-black text-on-surface text-lg">P001</p></div>
+              <div><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60">Status</p><p class="font-black text-primary text-lg flex items-center gap-1.5"><span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>Active</p></div>
+              <div><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60">Age</p><p class="font-black text-on-surface text-lg">18</p></div>
+              <div><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60">Role</p><p class="font-black text-on-surface text-lg">Batter</p></div>
+              <div><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60">Matches</p><p class="font-black text-on-surface text-lg">12</p></div>
+              <div><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60">Potential</p><p class="font-black text-on-surface text-lg">High</p></div>
+            </div>
+          </div>
+          <!-- Coach-approved summary pill -->
+          <div class="bg-primary/5 border border-primary/20 rounded-2xl p-5 text-center min-w-[160px]">
+            <span class="material-symbols-outlined fill-icon text-primary text-3xl">verified</span>
+            <p class="text-[10px] font-black uppercase tracking-widest text-primary mt-1">Coach Approved Summary</p>
+            <p class="text-sm text-on-surface-variant mt-2 leading-snug">Power Hitter<br/>High Potential</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main summary cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="bg-surface-container-lowest p-7 rounded-[2rem] border border-outline-variant/30 hover:shadow-md transition-all">
+          <div class="flex justify-between items-start mb-5">
+            <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60">Total Runs</span>
+            <span class="material-symbols-outlined text-primary text-2xl">sports_cricket</span>
+          </div>
+          <p class="text-5xl font-black text-on-surface">487</p>
+          <p class="text-xs text-primary font-bold flex items-center gap-1 mt-2"><span class="material-symbols-outlined text-sm">trending_up</span>12 matches this season</p>
+        </div>
+        <div class="bg-surface-container-lowest p-7 rounded-[2rem] border border-outline-variant/30 hover:shadow-md transition-all">
+          <div class="flex justify-between items-start mb-5">
+            <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60">Strike Rate</span>
+            <span class="material-symbols-outlined text-secondary text-2xl">bolt</span>
+          </div>
+          <p class="text-5xl font-black text-on-surface">142.6</p>
+          <p class="text-xs text-secondary font-bold flex items-center gap-1 mt-2"><span class="material-symbols-outlined text-sm">trending_up</span>Season aggregate</p>
+        </div>
+        <div class="bg-surface-container-lowest p-7 rounded-[2rem] border border-outline-variant/30 hover:shadow-md transition-all">
+          <div class="flex justify-between items-start mb-5">
+            <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60">Wickets / Econ</span>
+            <span class="material-symbols-outlined text-tertiary text-2xl">track_changes</span>
+          </div>
+          <p class="text-5xl font-black text-on-surface">1</p>
+          <p class="text-xs text-tertiary font-bold uppercase mt-2">Economy 8.4</p>
+        </div>
+        <div class="bg-surface-container-lowest p-7 rounded-[2rem] border border-outline-variant/30 hover:shadow-md transition-all">
+          <div class="flex justify-between items-start mb-5">
+            <span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60">Training Attend.</span>
+            <span class="material-symbols-outlined text-primary text-2xl">fitness_center</span>
+          </div>
+          <p class="text-5xl font-black text-on-surface">94%</p>
+          <p class="text-xs text-primary font-bold flex items-center gap-1 mt-2"><span class="material-symbols-outlined text-sm">verified</span>Excellent</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Recent Performance -->
+        <section class="bg-surface-container-lowest rounded-[2rem] p-7 border border-outline-variant/30 lg:col-span-1">
+          <h3 class="text-lg font-black text-on-surface mb-1">Recent Performance</h3>
+          <p class="text-on-surface-variant/60 text-xs mb-5">Last 3 matches · recorded by coach</p>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between p-3 bg-surface-container-low rounded-xl">
+              <div><p class="text-sm font-bold text-on-surface">vs Titans U19</p><p class="text-[11px] text-on-surface-variant/60">Jun 18, 2026</p></div>
+              <span class="px-2.5 py-1 bg-primary/10 border border-primary/20 text-primary text-[10px] font-black rounded-md">87 (54)</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-surface-container-low rounded-xl">
+              <div><p class="text-sm font-bold text-on-surface">vs Lions U19</p><p class="text-[11px] text-on-surface-variant/60">Jun 12, 2026</p></div>
+              <span class="px-2.5 py-1 bg-surface-container-highest text-on-surface-variant text-[10px] font-black rounded-md">43 (38)</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-surface-container-low rounded-xl">
+              <div><p class="text-sm font-bold text-on-surface">vs Stars Cricket Academy</p><p class="text-[11px] text-on-surface-variant/60">Jun 6, 2026</p></div>
+              <span class="px-2.5 py-1 bg-primary/10 border border-primary/20 text-primary text-[10px] font-black rounded-md">112* (78)</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Upcoming Schedule -->
+        <section class="bg-surface-container-lowest rounded-[2rem] p-7 border border-outline-variant/30 lg:col-span-1">
+          <h3 class="text-lg font-black text-on-surface mb-1">Upcoming Schedule</h3>
+          <p class="text-on-surface-variant/60 text-xs mb-5">Next sessions &amp; matches</p>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3 p-3 bg-primary/5 border border-primary/20 rounded-xl">
+              <div class="text-center w-10 flex-shrink-0"><p class="text-lg font-black text-primary leading-none">24</p><p class="text-[9px] font-black uppercase text-primary/70">Aug</p></div>
+              <div class="flex-1"><p class="text-sm font-bold text-on-surface">Morning Net Session</p><p class="text-[11px] text-on-surface-variant/60">7:00 AM · Academy Ground A</p></div>
+            </div>
+            <div class="flex items-center gap-3 p-3 bg-tertiary/5 border border-tertiary/20 rounded-xl">
+              <div class="text-center w-10 flex-shrink-0"><p class="text-lg font-black text-tertiary leading-none">25</p><p class="text-[9px] font-black uppercase text-tertiary/70">Aug</p></div>
+              <div class="flex-1"><p class="text-sm font-bold text-on-surface">T20 Match vs Colombo Youth XI</p><p class="text-[11px] text-on-surface-variant/60">10:00 AM · Academy Main Ground</p></div>
+            </div>
+            <div class="flex items-center gap-3 p-3 bg-surface-container-low rounded-xl">
+              <div class="text-center w-10 flex-shrink-0"><p class="text-lg font-black text-on-surface leading-none">27</p><p class="text-[9px] font-black uppercase text-on-surface-variant/60">Aug</p></div>
+              <div class="flex-1"><p class="text-sm font-bold text-on-surface">Fielding &amp; Batting Session</p><p class="text-[11px] text-on-surface-variant/60">6:00 AM · Indoor Nets</p></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Current Goals -->
+        <section class="bg-surface-container-lowest rounded-[2rem] p-7 border border-outline-variant/30 lg:col-span-1">
+          <h3 class="text-lg font-black text-on-surface mb-1">Current Goals</h3>
+          <p class="text-on-surface-variant/60 text-xs mb-5">Set and tracked by your coach</p>
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between text-xs font-bold text-on-surface mb-1"><span>Reach 500 season runs</span><span class="text-primary">On Track</span></div>
+              <div class="goal-bar"><div class="goal-bar-fill" style="width:97%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs font-bold text-on-surface mb-1"><span>Improve strike rotation efficiency</span><span class="text-tertiary">In Progress</span></div>
+              <div class="goal-bar"><div class="goal-bar-fill" style="width:68%"></div></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Latest Coach Feedback -->
+      <section class="bg-surface-container-lowest rounded-[2rem] p-7 border border-outline-variant/30">
+        <h3 class="text-lg font-black text-on-surface mb-1">Latest Coach Feedback</h3>
+        <p class="text-on-surface-variant/60 text-xs mb-5">Feedback shared with you by your coach</p>
+        <div class="bg-primary/5 border border-primary/20 rounded-2xl p-6">
+          <div class="flex items-start justify-between gap-4 mb-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center font-black text-on-primary-container">RJ</div>
+              <div>
+                <p class="font-black text-on-surface text-sm">Coach Ravi Jayasinghe</p>
+                <p class="text-[11px] text-on-surface-variant/60">After vs Titans U19 · Jun 18, 2026</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined fill-icon text-primary text-2xl">star</span>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed">Outstanding batting performance today. Your footwork against the pacers was exceptional — kept excellent head position throughout. Continue working on bowling economy in the upcoming net sessions.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- ════════════════════ PAGE: My Profile ════════════════════ -->
+    <div id="page-profile" class="portal-page space-y-7">
+      <section class="bg-surface-container-lowest rounded-[2rem] p-8 border border-outline-variant/30">
+        <div class="flex items-center justify-between mb-1">
+          <h3 class="text-2xl font-black text-on-surface">My Profile</h3>
+          <span class="px-3 py-1 bg-surface-container-highest rounded-full text-[9px] font-black text-on-surface-variant uppercase">View Only</span>
+        </div>
+        <p class="text-on-surface-variant/60 text-sm mb-7">Official profile information · maintained by coach/admin</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10"><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60 mb-1">Player ID</p><p class="font-black text-on-surface text-lg font-mono">P001</p></div>
+          <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10"><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60 mb-1">Full Name</p><p class="font-black text-on-surface text-lg">Kasun Perera</p></div>
+          <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10"><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60 mb-1">Age</p><p class="font-black text-on-surface text-lg">18</p></div>
+          <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10"><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60 mb-1">Primary Role</p><p class="font-black text-on-surface text-lg">Batter</p></div>
+          <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10"><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60 mb-1">Batting Style</p><p class="font-black text-on-surface text-lg">Not recorded</p></div>
+          <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10"><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60 mb-1">Bowling Style</p><p class="font-black text-on-surface text-lg">Not recorded</p></div>
+          <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10"><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60 mb-1">Height</p><p class="font-black text-on-surface text-lg">Not recorded</p></div>
+          <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10"><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60 mb-1">Weight</p><p class="font-black text-on-surface text-lg">Not recorded</p></div>
+          <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10"><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60 mb-1">Fitness Score</p><p class="font-black text-on-surface text-lg">82/100</p></div>
+          <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10"><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60 mb-1">Player Status</p><p class="font-black text-primary text-lg flex items-center gap-1.5"><span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>Active</p></div>
+          <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10"><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60 mb-1">U19 Category</p><p class="font-black text-on-surface text-lg">U-19</p></div>
+          <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10"><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60 mb-1">Match Format</p><p class="font-black text-on-surface text-lg">T20</p></div>
+        </div>
+
+        <!-- Coach-approved summary -->
+        <div class="mt-6 bg-primary/5 border border-primary/20 rounded-2xl p-5 flex items-center gap-4">
+          <span class="material-symbols-outlined fill-icon text-primary text-3xl flex-shrink-0">verified</span>
+          <div>
+            <p class="text-[10px] font-black uppercase tracking-widest text-primary">Coach Approved Summary</p>
+            <p class="text-sm text-on-surface-variant mt-1">Power Hitter · High Potential</p>
+          </div>
+        </div>
+        <p class="text-[11px] text-on-surface-variant/50 mt-5 flex items-center gap-1.5"><span class="material-symbols-outlined text-sm">lock</span>This information is view-only. Official records are managed by your coach/admin.</p>
+      </section>
+    </div>
+
+    <!-- ════════════════════ PAGE: My Match Stats ════════════════════ -->
+    <div id="page-match-stats" class="portal-page space-y-7">
+      <section class="bg-surface-container-lowest rounded-[2rem] p-8 border border-outline-variant/30">
+        <div class="flex justify-between items-end mb-7">
+          <div>
+            <h3 class="text-2xl font-black text-on-surface">My Match Statistics</h3>
+            <p class="text-on-surface-variant/60 text-sm mt-0.5">2025–26 season · T20 format · <span id="stats-mode-label">Batting</span> · <span class="text-on-surface-variant/40">Recorded by Coach</span></p>
+          </div>
+          <div class="flex gap-2 bg-surface-container-low p-1 rounded-xl border border-outline-variant/10">
+            <button data-mode="batting" onclick="switchStatMode('batting')" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-colors">Batting</button>
+            <button data-mode="bowling" onclick="switchStatMode('bowling')" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-colors">Bowling</button>
+            <button data-mode="fielding" onclick="switchStatMode('fielding')" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-colors">Fielding</button>
+          </div>
+        </div>
+        <div class="rounded-2xl overflow-hidden border border-outline-variant/20">
+          <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead id="stats-thead"></thead>
+            <tbody id="stats-tbody" class="divide-y divide-outline-variant/10"></tbody>
+          </table>
+          </div>
+          <div class="px-7 py-5 border-t border-outline-variant/10 flex justify-between items-center">
+            <p class="text-xs text-on-surface-variant/60">Latest 5 of 12 matches · entered by coach</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Performance Trend -->
+      <section class="bg-surface-container-lowest rounded-[2rem] p-8 border border-outline-variant/30">
+        <div class="flex flex-wrap justify-between items-end gap-4 mb-7">
+          <div>
+            <h3 class="text-2xl font-black text-on-surface">Performance Trend</h3>
+            <p class="text-on-surface-variant/60 text-sm mt-0.5">Recent 5 T20 matches · recorded by coach</p>
+          </div>
+          <div class="flex gap-2 bg-surface-container-low p-1 rounded-xl border border-outline-variant/10">
+            <button data-metric="runs" onclick="switchTrendMetric('runs')" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-colors">Runs</button>
+            <button data-metric="sr" onclick="switchTrendMetric('sr')" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-colors">Strike Rate</button>
+            <button data-metric="wickets" onclick="switchTrendMetric('wickets')" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-colors">Wickets</button>
+            <button data-metric="economy" onclick="switchTrendMetric('economy')" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-colors">Economy</button>
+          </div>
+        </div>
+        <div class="h-[320px] sm:h-[360px]">
+          <canvas id="performance-chart"></canvas>
+        </div>
+      </section>
+    </div>
+
+    <!-- ════════════════════ PAGE: My Training Records ════════════════════ -->
+    <div id="page-training" class="portal-page space-y-7">
+      <section class="bg-surface-container-lowest rounded-[2rem] p-8 border border-outline-variant/30">
+        <h3 class="text-2xl font-black text-on-surface mb-1">My Training Records</h3>
+        <p class="text-on-surface-variant/60 text-sm mb-7">Attendance, drills, practice scores &amp; fitness — entered by coach · view only</p>
+        <div class="rounded-2xl overflow-hidden border border-outline-variant/20">
+          <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="bg-surface-container-low border-b border-outline-variant/20">
+                <th class="px-7 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60">Session</th>
+                <th class="px-7 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60">Type</th>
+                <th class="px-7 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 text-center">Attend.</th>
+                <th class="px-7 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 text-center">Bat Score</th>
+                <th class="px-7 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 text-center">Bowl Score</th>
+                <th class="px-7 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 text-center">Fielding Score</th>
+                <th class="px-7 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 text-center">Fitness</th>
+                <th class="px-7 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 text-center">Drills</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/10">
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-7 py-4"><p class="font-bold text-on-surface text-sm">Morning Net Session</p><p class="text-[11px] text-on-surface-variant/60">Jun 19, 2026</p></td>
+                <td class="px-7 py-4"><span class="px-2 py-0.5 bg-primary/10 border border-primary/20 text-primary text-[9px] font-black rounded-md uppercase">Batting</span></td>
+                <td class="px-7 py-4 text-center"><span class="material-symbols-outlined fill-icon text-primary text-lg">check_circle</span></td>
+                <td class="px-7 py-4 text-center font-black text-on-surface">88/100</td>
+                <td class="px-7 py-4 text-center text-on-surface-variant/40 font-bold">—</td>
+                <td class="px-7 py-4 text-center text-on-surface-variant/40 font-bold">—</td>
+                <td class="px-7 py-4 text-center font-black text-on-surface">92/100</td>
+                <td class="px-7 py-4 text-center font-bold text-on-surface">7/8</td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-7 py-4"><p class="font-bold text-on-surface text-sm">Bowling Practice</p><p class="text-[11px] text-on-surface-variant/60">Jun 17, 2026</p></td>
+                <td class="px-7 py-4"><span class="px-2 py-0.5 bg-tertiary/10 border border-tertiary/20 text-tertiary text-[9px] font-black rounded-md uppercase">Bowling</span></td>
+                <td class="px-7 py-4 text-center"><span class="material-symbols-outlined fill-icon text-primary text-lg">check_circle</span></td>
+                <td class="px-7 py-4 text-center text-on-surface-variant/40 font-bold">—</td>
+                <td class="px-7 py-4 text-center font-black text-on-surface">74/100</td>
+                <td class="px-7 py-4 text-center text-on-surface-variant/40 font-bold">—</td>
+                <td class="px-7 py-4 text-center font-black text-on-surface">89/100</td>
+                <td class="px-7 py-4 text-center font-bold text-on-surface">6/8</td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-7 py-4"><p class="font-bold text-on-surface text-sm">Full Squad Training</p><p class="text-[11px] text-on-surface-variant/60">Jun 15, 2026</p></td>
+                <td class="px-7 py-4"><span class="px-2 py-0.5 bg-secondary/10 border border-secondary/20 text-secondary text-[9px] font-black rounded-md uppercase">All-Round</span></td>
+                <td class="px-7 py-4 text-center"><span class="material-symbols-outlined fill-icon text-primary text-lg">check_circle</span></td>
+                <td class="px-7 py-4 text-center font-black text-on-surface">82/100</td>
+                <td class="px-7 py-4 text-center font-black text-on-surface">71/100</td>
+                <td class="px-7 py-4 text-center font-black text-on-surface">79/100</td>
+                <td class="px-7 py-4 text-center font-black text-on-surface">95/100</td>
+                <td class="px-7 py-4 text-center font-bold text-on-surface">8/8</td>
+              </tr>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="px-7 py-4"><p class="font-bold text-on-surface text-sm">Fitness &amp; Fielding</p><p class="text-[11px] text-on-surface-variant/60">Jun 13, 2026</p></td>
+                <td class="px-7 py-4"><span class="px-2 py-0.5 bg-surface-container-highest rounded-full text-[9px] font-black text-on-surface-variant uppercase">Fielding</span></td>
+                <td class="px-7 py-4 text-center"><span class="material-symbols-outlined fill-icon text-error text-lg">cancel</span></td>
+                <td class="px-7 py-4 text-center text-on-surface-variant/40 font-bold">—</td>
+                <td class="px-7 py-4 text-center text-on-surface-variant/40 font-bold">—</td>
+                <td class="px-7 py-4 text-center text-on-surface-variant/40 font-bold">—</td>
+                <td class="px-7 py-4 text-center text-on-surface-variant/40 font-bold">—</td>
+                <td class="px-7 py-4 text-center text-on-surface-variant/40 font-bold">—</td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ════════════════════ PAGE: My Schedule ════════════════════ -->
+    <div id="page-schedule" class="portal-page space-y-7">
+      <section class="bg-surface-container-lowest rounded-[2rem] p-8 border border-outline-variant/30">
+        <h3 class="text-2xl font-black text-on-surface mb-1">My Schedule</h3>
+        <p class="text-on-surface-variant/60 text-sm mb-7">Upcoming training sessions &amp; matches — managed by coach/admin</p>
+        <div class="space-y-3">
+          <div class="flex items-center gap-5 p-5 bg-primary/5 border border-primary/20 rounded-2xl hover:border-primary/40 transition-all">
+            <div class="text-center w-14 flex-shrink-0">
+              <p class="text-2xl font-black text-primary leading-none">24</p>
+              <p class="text-[10px] font-black uppercase text-primary/70">Aug</p>
+            </div>
+            <div class="w-px h-10 bg-primary/20 flex-shrink-0"></div>
+            <div class="flex-1">
+              <p class="font-black text-on-surface">Morning Net Session</p>
+              <p class="text-sm text-on-surface-variant/70">7:00 AM – 9:00 AM · Academy Ground A</p>
+            </div>
+            <span class="px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-[9px] font-black rounded-md uppercase">Training</span>
+          </div>
+          <div class="flex items-center gap-5 p-5 bg-tertiary/5 border border-tertiary/20 rounded-2xl hover:border-tertiary/40 transition-all">
+            <div class="text-center w-14 flex-shrink-0">
+              <p class="text-2xl font-black text-tertiary leading-none">25</p>
+              <p class="text-[10px] font-black uppercase text-tertiary/70">Aug</p>
+            </div>
+            <div class="w-px h-10 bg-tertiary/20 flex-shrink-0"></div>
+            <div class="flex-1">
+              <p class="font-black text-on-surface">T20 Match vs Colombo Youth XI</p>
+              <p class="text-sm text-on-surface-variant/70">10:00 AM – 2:00 PM · Academy Main Ground</p>
+            </div>
+            <span class="px-3 py-1 bg-tertiary/10 border border-tertiary/20 text-tertiary text-[9px] font-black rounded-md uppercase">Match</span>
+          </div>
+          <div class="flex items-center gap-5 p-5 bg-surface-container-low border border-outline-variant/10 rounded-2xl hover:border-primary/20 transition-all">
+            <div class="text-center w-14 flex-shrink-0">
+              <p class="text-2xl font-black text-on-surface leading-none">27</p>
+              <p class="text-[10px] font-black uppercase text-on-surface-variant/60">Aug</p>
+            </div>
+            <div class="w-px h-10 bg-outline-variant/30 flex-shrink-0"></div>
+            <div class="flex-1">
+              <p class="font-black text-on-surface">Fielding &amp; Batting Session</p>
+              <p class="text-sm text-on-surface-variant/70">6:00 AM – 8:00 AM · Indoor Nets</p>
+            </div>
+            <span class="px-3 py-1 bg-surface-container-highest rounded-full text-on-surface-variant text-[9px] font-black uppercase">Training</span>
+          </div>
+          <div class="flex items-center gap-5 p-5 bg-secondary/5 border border-secondary/20 rounded-2xl hover:border-secondary/40 transition-all">
+            <div class="text-center w-14 flex-shrink-0">
+              <p class="text-2xl font-black text-secondary leading-none">29</p>
+              <p class="text-[10px] font-black uppercase text-secondary/70">Aug</p>
+            </div>
+            <div class="w-px h-10 bg-secondary/20 flex-shrink-0"></div>
+            <div class="flex-1">
+              <p class="font-black text-on-surface">District U19 Tournament vs Southern Academy U19</p>
+              <p class="text-sm text-on-surface-variant/70">9:00 AM · Provincial Cricket Ground</p>
+            </div>
+            <span class="px-3 py-1 bg-secondary/10 border border-secondary/20 text-secondary text-[9px] font-black rounded-md uppercase">Match</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ════════════════════ PAGE: My Goals ════════════════════ -->
+    <div id="page-goals" class="portal-page space-y-7">
+      <section class="bg-surface-container-lowest rounded-[2rem] p-8 border border-outline-variant/30">
+        <h3 class="text-2xl font-black text-on-surface mb-1">My Goals</h3>
+        <p class="text-on-surface-variant/60 text-sm mb-7">Development goals set by your coach · track your progress</p>
+        <div class="space-y-4">
+          <!-- Goal 1 -->
+          <div class="bg-surface-container-low rounded-2xl p-6 border border-outline-variant/10 hover:border-primary/30 transition-all">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
+                  <span class="material-symbols-outlined fill-icon text-primary text-lg">sports_cricket</span>
+                </div>
+                <div>
+                  <p class="font-black text-on-surface">Reach 500 season runs</p>
+                  <p class="text-[11px] text-on-surface-variant/60 mt-0.5">Deadline: 31 Aug 2026</p>
+                </div>
+              </div>
+              <span class="px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-[9px] font-black rounded-md uppercase flex-shrink-0">On Track</span>
+            </div>
+            <div class="mt-4">
+              <div class="flex justify-between text-[11px] font-bold text-on-surface-variant/60 mb-1.5">
+                <span>Current: 487</span><span>Target: 500</span>
+              </div>
+              <div class="goal-bar"><div class="goal-bar-fill" style="width:97%"></div></div>
+              <p class="text-[10px] text-primary font-bold mt-1">97% progress</p>
+            </div>
+          </div>
+          <!-- Goal 2 -->
+          <div class="bg-surface-container-low rounded-2xl p-6 border border-outline-variant/10 hover:border-tertiary/30 transition-all">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-tertiary/10 border border-tertiary/20 flex items-center justify-center flex-shrink-0">
+                  <span class="material-symbols-outlined fill-icon text-tertiary text-lg">track_changes</span>
+                </div>
+                <div>
+                  <p class="font-black text-on-surface">Improve strike rotation efficiency</p>
+                  <p class="text-[11px] text-on-surface-variant/60 mt-0.5">Deadline: 15 Sep 2026</p>
+                </div>
+              </div>
+              <span class="px-3 py-1 bg-tertiary/10 border border-tertiary/20 text-tertiary text-[9px] font-black rounded-md uppercase flex-shrink-0">In Progress</span>
+            </div>
+            <div class="mt-4">
+              <div class="flex justify-between text-[11px] font-bold text-on-surface-variant/60 mb-1.5">
+                <span>Current: 68%</span><span>Target: 78%</span>
+              </div>
+              <div class="goal-bar"><div class="goal-bar-fill" style="width:68%"></div></div>
+              <p class="text-[10px] text-tertiary font-bold mt-1">68% progress — improving</p>
+            </div>
+          </div>
+          <!-- Goal 3 -->
+          <div class="bg-surface-container-low rounded-2xl p-6 border border-outline-variant/10 hover:border-secondary/30 transition-all">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center flex-shrink-0">
+                  <span class="material-symbols-outlined fill-icon text-secondary text-lg">fitness_center</span>
+                </div>
+                <div>
+                  <p class="font-black text-on-surface">Maintain training attendance above 90%</p>
+                  <p class="text-[11px] text-on-surface-variant/60 mt-0.5">Deadline: Season end</p>
+                </div>
+              </div>
+              <span class="px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-[9px] font-black rounded-md uppercase flex-shrink-0">On Track</span>
+            </div>
+            <div class="mt-4">
+              <div class="flex justify-between text-[11px] font-bold text-on-surface-variant/60 mb-1.5">
+                <span>Current: 94%</span><span>Target: 90%</span>
+              </div>
+              <div class="goal-bar"><div class="goal-bar-fill" style="width:94%"></div></div>
+              <p class="text-[10px] text-primary font-bold mt-1">Goal achieved ✓</p>
+            </div>
+          </div>
+          <!-- Goal 4 -->
+          <div class="bg-surface-container-low rounded-2xl p-6 border border-outline-variant/10 hover:border-error/30 transition-all">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-error/10 border border-error/10 flex items-center justify-center flex-shrink-0">
+                  <span class="material-symbols-outlined fill-icon text-error text-lg">sports_handball</span>
+                </div>
+                <div>
+                  <p class="font-black text-on-surface">Improve fielding score above 80/100</p>
+                  <p class="text-[11px] text-on-surface-variant/60 mt-0.5">Deadline: 31 Aug 2026</p>
+                </div>
+              </div>
+              <span class="px-3 py-1 bg-error-container/20 border border-error/10 text-error text-[9px] font-black rounded-md uppercase flex-shrink-0">Needs Work</span>
+            </div>
+            <div class="mt-4">
+              <div class="flex justify-between text-[11px] font-bold text-on-surface-variant/60 mb-1.5">
+                <span>Current: 79</span><span>Target: 80</span>
+              </div>
+              <div class="goal-bar"><div class="goal-bar-fill" style="width:79%;background:linear-gradient(90deg,#ba1a1a,#ef4444)"></div></div>
+              <p class="text-[10px] text-error font-bold mt-1">1 point behind target</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ════════════════════ PAGE: My Feedback ════════════════════ -->
+    <div id="page-feedback" class="portal-page space-y-7">
+      <section class="bg-surface-container-lowest rounded-[2rem] p-8 border border-outline-variant/30">
+        <h3 class="text-2xl font-black text-on-surface mb-1">My Feedback</h3>
+        <p class="text-on-surface-variant/60 text-sm mb-7">Feedback shared with you by your coach</p>
+        <div class="space-y-4">
+          <div class="bg-primary/5 border border-primary/20 rounded-2xl p-6">
+            <div class="flex items-start justify-between gap-4 mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center font-black text-on-primary-container">RJ</div>
+                <div>
+                  <p class="font-black text-on-surface text-sm">Coach Ravi Jayasinghe</p>
+                  <p class="text-[11px] text-on-surface-variant/60">After vs Titans U19 · Jun 18, 2026</p>
+                </div>
+              </div>
+              <span class="material-symbols-outlined fill-icon text-primary text-2xl">star</span>
+            </div>
+            <p class="text-sm text-on-surface-variant leading-relaxed">Outstanding batting performance today. Your footwork against the pacers was exceptional — kept excellent head position throughout. The six over long-on in the 18th over was a result of perfect timing. Continue working on bowling economy in the upcoming net sessions.</p>
+          </div>
+          <div class="bg-tertiary/5 border border-tertiary/20 rounded-2xl p-6">
+            <div class="flex items-start justify-between gap-4 mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-tertiary/20 flex items-center justify-center font-black text-tertiary">RJ</div>
+                <div>
+                  <p class="font-black text-on-surface text-sm">Coach Ravi Jayasinghe</p>
+                  <p class="text-[11px] text-on-surface-variant/60">After Training · Jun 17, 2026</p>
+                </div>
+              </div>
+            </div>
+            <p class="text-sm text-on-surface-variant leading-relaxed">Bowling session showed improvement in yorker consistency. However, your release point is varying — try to focus on a fixed front-foot landing marker. Batting drills in the second half were very solid. Fitness levels are great — keep it up.</p>
+          </div>
+          <div class="bg-surface-container-low border border-outline-variant/10 rounded-2xl p-6">
+            <div class="flex items-start justify-between gap-4 mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-surface-container-highest flex items-center justify-center font-black text-on-surface-variant">RJ</div>
+                <div>
+                  <p class="font-black text-on-surface text-sm">Coach Ravi Jayasinghe</p>
+                  <p class="text-[11px] text-on-surface-variant/60">After vs Lions U19 · Jun 12, 2026</p>
+                </div>
+              </div>
+            </div>
+            <p class="text-sm text-on-surface-variant leading-relaxed">Difficult day with the bat. Short-pitch bowling from their pacers troubled you — we need to work specifically on that. Your bowling spell was controlled, while your fielding was excellent with two very good stops. Focus area for next week: short-ball batting drills at 135+ km/h.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ════════════════════ PAGE: My Development Report ════════════════════ -->
+    <div id="page-report" class="portal-page space-y-7">
+      <section class="bg-surface-container-lowest rounded-[2rem] p-8 border border-outline-variant/30">
+        <div class="flex justify-between items-start mb-7">
+          <div>
+            <h3 class="text-2xl font-black text-on-surface">My Development Report</h3>
+            <p class="text-on-surface-variant/60 text-sm mt-0.5">Coach-generated personalised report · Jun 2026</p>
+          </div>
+          <button id="pdf-btn" onclick="handlePdfDownload()" class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-black text-xs uppercase hover:bg-primary/90 transition-all">
+            <span class="material-symbols-outlined text-sm">download</span> Download PDF
+          </button>
+        </div>
+        <p id="pdf-note" class="hidden text-xs text-on-surface-variant/60 -mt-4 mb-6 bg-surface-container-low border border-outline-variant/10 rounded-xl px-4 py-3">PDF export will be available when the backend report service is connected.</p>
+
+        <!-- Strengths & Weaknesses -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+          <div class="bg-primary/5 border border-primary/20 rounded-2xl p-6">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="material-symbols-outlined fill-icon text-primary">thumb_up</span>
+              <h4 class="font-black text-on-surface uppercase tracking-wide text-sm">Strengths</h4>
+            </div>
+            <ul class="space-y-2">
+              <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined fill-icon text-primary text-base mt-0.5">check_circle</span>Exceptional power hitting — high strike rate (142.6)</li>
+              <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined fill-icon text-primary text-base mt-0.5">check_circle</span>487 runs across 12 matches this season</li>
+              <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined fill-icon text-primary text-base mt-0.5">check_circle</span>Strong training attendance (94%) and drill completion (86%)</li>
+              <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined fill-icon text-primary text-base mt-0.5">check_circle</span>Good overall fitness score (82/100)</li>
+            </ul>
+          </div>
+          <div class="bg-error-container/20 border border-error/10 rounded-2xl p-6">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="material-symbols-outlined fill-icon text-error">build</span>
+              <h4 class="font-black text-on-surface uppercase tracking-wide text-sm">Areas to Improve</h4>
+            </div>
+            <ul class="space-y-2">
+              <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined fill-icon text-error text-base mt-0.5">pending</span>Short-pitch batting — weak against pace above 135 km/h</li>
+              <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined fill-icon text-error text-base mt-0.5">pending</span>Bowling economy (8.4) — target below 7.0</li>
+              <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined fill-icon text-error text-base mt-0.5">pending</span>Fielding consistency — needs more match exposure</li>
+              <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined fill-icon text-tertiary text-base mt-0.5">info</span>Release point variation in bowling — needs correction</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Training Recommendation (coach-approved) -->
+        <div class="bg-surface-container-low border border-outline-variant/10 rounded-2xl p-6 mb-5">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined fill-icon text-secondary">model_training</span>
+            <h4 class="font-black text-on-surface uppercase tracking-wide text-sm">Recommended Training Focus</h4>
+            <span class="ml-auto px-2.5 py-1 bg-primary/10 border border-primary/20 text-primary text-[9px] font-black rounded-md uppercase">Coach Approved</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="flex items-start gap-3 p-4 bg-white rounded-xl border border-outline-variant/20">
+              <span class="material-symbols-outlined fill-icon text-primary text-xl mt-0.5">sports_cricket</span>
+              <div><p class="font-black text-on-surface text-sm">Short-ball batting drills</p><p class="text-[11px] text-on-surface-variant/60 mt-0.5">Machine at 135–140 km/h, 4-week cycle</p></div>
+            </div>
+            <div class="flex items-start gap-3 p-4 bg-white rounded-xl border border-outline-variant/20">
+              <span class="material-symbols-outlined fill-icon text-tertiary text-xl mt-0.5">track_changes</span>
+              <div><p class="font-black text-on-surface text-sm">Bowling economy control</p><p class="text-[11px] text-on-surface-variant/60 mt-0.5">Fixed release point marker practice</p></div>
+            </div>
+            <div class="flex items-start gap-3 p-4 bg-white rounded-xl border border-outline-variant/20">
+              <span class="material-symbols-outlined fill-icon text-secondary text-xl mt-0.5">sports_handball</span>
+              <div><p class="font-black text-on-surface text-sm">Fielding reactions</p><p class="text-[11px] text-on-surface-variant/60 mt-0.5">Close-in catching &amp; ground coverage</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Improvements -->
+        <div class="bg-surface-container-low border border-outline-variant/10 rounded-2xl p-6 mb-5">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined fill-icon text-primary">trending_up</span>
+            <h4 class="font-black text-on-surface uppercase tracking-wide text-sm">Recent Improvements</h4>
+          </div>
+          <ul class="space-y-2">
+            <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined fill-icon text-primary text-base mt-0.5">check_circle</span>Strike rate has improved across recent match performances.</li>
+            <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined fill-icon text-primary text-base mt-0.5">check_circle</span>Training attendance remains consistently above the academy target.</li>
+            <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined fill-icon text-primary text-base mt-0.5">check_circle</span>Fielding reactions have improved through recent training drills.</li>
+          </ul>
+        </div>
+
+        <!-- Current Development Plan -->
+        <div class="bg-surface-container-low border border-outline-variant/10 rounded-2xl p-6 mb-5">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined fill-icon text-primary">assignment</span>
+            <h4 class="font-black text-on-surface uppercase tracking-wide text-sm">Current Development Plan</h4>
+            <span class="ml-auto px-2.5 py-1 bg-primary/10 border border-primary/20 text-primary text-[9px] font-black rounded-md uppercase">Managed by Coach</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60 mb-1">Focus Area</p><p class="font-black text-on-surface text-sm">Strike Rotation &amp; Fielding</p></div>
+            <div><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60 mb-1">Start Date</p><p class="font-black text-on-surface text-sm">01 Jul 2026</p></div>
+            <div><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60 mb-1">Target Date</p><p class="font-black text-on-surface text-sm">15 Sep 2026</p></div>
+            <div><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60 mb-1">Main Objective</p><p class="font-black text-on-surface text-sm">Improve strike rotation, running between wickets and fielding reactions</p></div>
+            <div><p class="text-[10px] font-black uppercase tracking-wider text-on-surface-variant/60 mb-1">Progress Status</p><p class="font-black text-primary text-sm">On Track</p></div>
+          </div>
+          <div class="mt-4">
+            <div class="flex justify-between text-[11px] font-bold text-on-surface-variant/60 mb-1.5">
+              <span>Progress</span><span>68%</span>
+            </div>
+            <div class="goal-bar"><div class="goal-bar-fill" style="width:68%"></div></div>
+          </div>
+        </div>
+
+        <!-- Coach summary note -->
+        <div class="bg-primary/5 border border-primary/20 rounded-2xl p-5 flex items-start gap-4">
+          <span class="material-symbols-outlined fill-icon text-primary text-2xl flex-shrink-0 mt-0.5">person</span>
+          <div>
+            <p class="font-black text-on-surface text-sm mb-1">Coach's Summary — Ravi Jayasinghe</p>
+            <p class="text-sm text-on-surface-variant leading-relaxed">Kasun is one of the most promising power hitters in the U19 squad. His batting output this season has been strong. With targeted work on strike rotation, running between wickets and fielding reactions, he is on track to reach the next selection level. Keep working hard.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ════════════════════ PAGE: My Training Progress Status ════════════════════ -->
+    <div id="page-progress" class="portal-page space-y-7">
+      <section class="bg-surface-container-lowest rounded-[2rem] p-8 border border-outline-variant/30">
+        <h3 class="text-2xl font-black text-on-surface mb-1">My Training Progress Status</h3>
+        <p class="text-on-surface-variant/60 text-sm mb-7">Based on coach-entered training data · view only</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10">
+            <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 mb-2">Attendance</p>
+            <p class="text-3xl font-black text-on-surface">94%</p>
+            <div class="goal-bar mt-3"><div class="goal-bar-fill" style="width:94%"></div></div>
+            <p class="text-[11px] text-primary font-bold mt-1">Target Achieved</p>
+          </div>
+          <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10">
+            <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 mb-2">Drill Completion</p>
+            <p class="text-3xl font-black text-on-surface">86%</p>
+            <div class="goal-bar mt-3"><div class="goal-bar-fill" style="width:86%"></div></div>
+            <p class="text-[11px] text-primary font-bold mt-1">On Track</p>
+          </div>
+          <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10">
+            <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 mb-2">Avg Batting Practice</p>
+            <p class="text-3xl font-black text-on-surface">85/100</p>
+            <div class="goal-bar mt-3"><div class="goal-bar-fill" style="width:85%"></div></div>
+            <p class="text-[11px] text-primary font-bold mt-1">On Track</p>
+          </div>
+          <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10">
+            <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 mb-2">Avg Bowling Practice</p>
+            <p class="text-3xl font-black text-on-surface">73/100</p>
+            <div class="goal-bar mt-3"><div class="goal-bar-fill" style="width:73%"></div></div>
+            <p class="text-[11px] text-tertiary font-bold mt-1">Needs Improvement</p>
+          </div>
+          <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10">
+            <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 mb-2">Avg Fielding Practice</p>
+            <p class="text-3xl font-black text-on-surface">79/100</p>
+            <div class="goal-bar mt-3"><div class="goal-bar-fill" style="width:79%"></div></div>
+            <p class="text-[11px] text-tertiary font-bold mt-1">Needs Improvement</p>
+          </div>
+          <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10">
+            <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 mb-2">Fitness Score</p>
+            <p class="text-3xl font-black text-on-surface">82/100</p>
+            <div class="goal-bar mt-3"><div class="goal-bar-fill" style="width:82%"></div></div>
+            <p class="text-[11px] text-primary font-bold mt-1">On Track</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  </div><!-- /body -->
+</main>
+
+<!-- Background glows -->
+<div class="fixed inset-0 pointer-events-none z-[-1] overflow-hidden">
+  <div class="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-primary/5 blur-[160px] rounded-full"></div>
+  <div class="absolute bottom-[-10%] left-[5%] w-[40%] h-[40%] bg-secondary/5 blur-[120px] rounded-full"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  const htmlEl = document.documentElement;
+  const isDark = () => htmlEl.classList.contains('dark');
+
+  // Apply saved theme FIRST (before chart renders)
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    htmlEl.classList.add('dark'); htmlEl.classList.remove('light');
+  } else {
+    htmlEl.classList.add('light'); htmlEl.classList.remove('dark');
+  }
+
+  // ── Theme toggle ──
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    if (htmlEl.classList.contains('dark')) {
+      htmlEl.classList.remove('dark'); htmlEl.classList.add('light');
+      localStorage.setItem('theme', 'light');
+    } else {
+      htmlEl.classList.remove('light'); htmlEl.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    }
+    renderTrendChart(); // redraw chart with matching theme colors
+  });
+
+  // ── Sidebar navigation: single-page routing, one page visible at a time ──
+  const navLinks = document.querySelectorAll('.nav-link[data-target]');
+  const pageTitleEl = document.getElementById('page-title');
+
+  function goToPage(name, title) {
+    document.querySelectorAll('.portal-page').forEach(p => p.classList.remove('active'));
+    const page = document.getElementById('page-' + name);
+    if (page) page.classList.add('active');
+
+    navLinks.forEach(l => l.classList.remove('nav-active'));
+    const activeLink = document.querySelector(`.nav-link[data-target="${name}"]`);
+    if (activeLink) activeLink.classList.add('nav-active');
+
+    if (pageTitleEl && title) pageTitleEl.textContent = title;
+
+    if (name === 'match-stats' && trendChart) setTimeout(() => trendChart.resize(), 60);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  navLinks.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      goToPage(link.getAttribute('data-target'), link.getAttribute('data-title'));
+      closeMobileSidebar();
+    });
+  });
+
+  // ── Mobile sidebar (hamburger overlay, below 900px) ──
+  const sidebarEl = document.querySelector('aside');
+  const overlayEl = document.getElementById('sidebar-overlay');
+  const hamburgerBtn = document.getElementById('hamburger-btn');
+
+  function openMobileSidebar() {
+    sidebarEl.classList.add('sidebar-open');
+    overlayEl.classList.add('overlay-visible');
+  }
+  function closeMobileSidebar() {
+    sidebarEl.classList.remove('sidebar-open');
+    overlayEl.classList.remove('overlay-visible');
+  }
+  if (hamburgerBtn) {
+    hamburgerBtn.addEventListener('click', openMobileSidebar);
+  }
+  if (overlayEl) {
+    overlayEl.addEventListener('click', closeMobileSidebar);
+  }
+
+  // ── Logout (prototype only — real auth via FastAPI later) ──
+  document.getElementById('logout-link').addEventListener('click', e => {
+    e.preventDefault();
+    alert('Logout will be connected to the authentication service.');
+  });
+
+  // ── Development report PDF (prototype only) ──
+  function handlePdfDownload() {
+    document.getElementById('pdf-note').classList.remove('hidden');
+  }
+
+  // ── Shared pill-button active state (stat mode + trend metric buttons) ──
+  function setPillActive(attr, value) {
+    document.querySelectorAll(`[data-${attr}]`).forEach(btn => {
+      const on = btn.dataset[attr] === value;
+      btn.classList.toggle('bg-primary-container', on);
+      btn.classList.toggle('text-on-primary-container', on);
+      btn.classList.toggle('text-on-surface-variant/50', !on);
+      btn.classList.toggle('hover:text-on-surface', !on);
+    });
+  }
+
+  // ── Match statistics (view-only · entered by coach/admin) ──
+  const matches = [
+    { opponent:'vs Royal Academy U19', date:'May 22, 2026', result:'Won',
+      batting:{ runs:'65', balls:'41', fours:'6', sixes:'4', sr:'158.5' },
+      bowling:{ overs:'4', conceded:'29', wickets:'0', econ:'7.3' },
+      fielding:{ catches:'1', runouts:'0', score:'82' } },
+    { opponent:'vs Falcons U19', date:'May 29, 2026', result:'Won',
+      batting:{ runs:'21', balls:'19', fours:'2', sixes:'0', sr:'110.5' },
+      bowling:{ overs:'4', conceded:'25', wickets:'0', econ:'6.3' },
+      fielding:{ catches:'1', runouts:'1', score:'88' } },
+    { opponent:'vs Stars Cricket Academy', date:'Jun 6, 2026', result:'Won',
+      batting:{ runs:'112*', balls:'78', fours:'10', sixes:'6', sr:'143.6' },
+      bowling:{ overs:'3', conceded:'27', wickets:'0', econ:'9.0' },
+      fielding:{ catches:'2', runouts:'0', score:'92' } },
+    { opponent:'vs Lions U19', date:'Jun 12, 2026', result:'Lost',
+      batting:{ runs:'43', balls:'38', fours:'4', sixes:'1', sr:'113.1' },
+      bowling:{ overs:'4', conceded:'31', wickets:'0', econ:'7.8' },
+      fielding:{ catches:'0', runouts:'1', score:'78' } },
+    { opponent:'vs Titans U19', date:'Jun 18, 2026', result:'Won',
+      batting:{ runs:'87', balls:'54', fours:'8', sixes:'3', sr:'161.1' },
+      bowling:{ overs:'4', conceded:'24', wickets:'1', econ:'6.0' },
+      fielding:{ catches:'1', runouts:'0', score:'85' } },
+  ];
+
+  const statModes = {
+    batting: { label:'Batting',  cols:['Match','Format','Runs','Balls','4s','6s','Strike Rate','Result'],   align:['','','center','center','center','center','center','right'] },
+    bowling: { label:'Bowling',  cols:['Match','Format','Overs','Runs Conceded','Wickets','Economy','Result'], align:['','','center','center','center','center','right'] },
+    fielding:{ label:'Fielding', cols:['Match','Format','Catches','Run-outs','Fielding Score','Result'],       align:['','','center','center','center','right'] },
+  };
+  let statMode = 'batting';
+
+  function thCell(text, align) {
+    return `<th class="px-7 py-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60 ${align ? 'text-' + align : ''}">${text}</th>`;
+  }
+  function matchCell(m) {
+    return `<td class="px-7 py-4"><p class="font-bold text-on-surface text-sm">${m.opponent}</p><p class="text-[11px] text-on-surface-variant/60">${m.date}</p></td>`;
+  }
+  function formatCell() {
+    return `<td class="px-7 py-4"><span class="px-2 py-0.5 bg-surface-container-highest rounded-full text-[9px] font-black text-on-surface-variant uppercase">T20</span></td>`;
+  }
+  function plainCell(v) {
+    return `<td class="px-7 py-4 text-center text-sm font-bold text-on-surface">${v}</td>`;
+  }
+  function highlightCell(v) {
+    return `<td class="px-7 py-4 text-center"><span class="px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-[10px] font-black rounded-md">${v}</span></td>`;
+  }
+  function resultCell(res) {
+    const c = res === 'Won' ? 'primary' : 'error';
+    return `<td class="px-7 py-4 text-right"><span class="inline-flex items-center gap-1 px-2.5 py-1 bg-${c}/10 border border-${c}/10 text-[9px] font-black text-${c} uppercase rounded-md"><span class="w-1.5 h-1.5 bg-${c} rounded-full"></span>${res}</span></td>`;
+  }
+
+  function statRowHtml(m) {
+    if (statMode === 'bowling') {
+      const b = m.bowling;
+      return `<tr class="hover:bg-surface-container-low transition-colors">${matchCell(m)}${formatCell()}${plainCell(b.overs)}${plainCell(b.conceded)}${+b.wickets >= 2 ? highlightCell(b.wickets) : plainCell(b.wickets)}${plainCell(b.econ)}${resultCell(m.result)}</tr>`;
+    }
+    if (statMode === 'fielding') {
+      const f = m.fielding;
+      return `<tr class="hover:bg-surface-container-low transition-colors">${matchCell(m)}${formatCell()}${plainCell(f.catches)}${plainCell(f.runouts)}${+f.score >= 85 ? highlightCell(f.score) : plainCell(f.score)}${resultCell(m.result)}</tr>`;
+    }
+    const bat = m.batting;
+    return `<tr class="hover:bg-surface-container-low transition-colors">${matchCell(m)}${formatCell()}${parseInt(bat.runs) >= 50 ? highlightCell(bat.runs) : plainCell(bat.runs)}${plainCell(bat.balls)}${plainCell(bat.fours)}${plainCell(bat.sixes)}${plainCell(bat.sr)}${resultCell(m.result)}</tr>`;
+  }
+
+  function renderStatsTable() {
+    const mode = statModes[statMode];
+    document.getElementById('stats-mode-label').textContent = mode.label;
+    document.getElementById('stats-thead').innerHTML =
+      '<tr class="bg-surface-container-low border-b border-outline-variant/20">' +
+      mode.cols.map((c, i) => thCell(c, mode.align[i])).join('') +
+      '</tr>';
+    document.getElementById('stats-tbody').innerHTML = matches.map(statRowHtml).join('');
+  }
+
+  function switchStatMode(mode) {
+    statMode = mode;
+    setPillActive('mode', mode);
+    renderStatsTable();
+  }
+
+  // ── Performance Trend (recent 5 T20 matches · sample data) ──
+  const trendData = {
+    labels: ['vs Royal Academy U19', 'vs Falcons U19', 'vs Stars Cricket Academy', 'vs Lions U19', 'vs Titans U19'],
+    runs:    { label:'Runs',        values:[65, 21, 112, 43, 87] },
+    sr:      { label:'Strike Rate', values:[158.5, 110.5, 143.6, 113.1, 161.1] },
+    wickets: { label:'Wickets',     values:[0, 0, 0, 0, 1] },
+    economy: { label:'Economy',     values:[7.3, 6.3, 9.0, 7.8, 6.0] },
+  };
+  let currentMetric = 'runs';
+  let trendChart = null;
+
+  function renderTrendChart() {
+    if (typeof Chart === 'undefined') return;
+    const canvas = document.getElementById('performance-chart');
+    if (!canvas) return;
+    const d = trendData[currentMetric];
+    const grid = isDark() ? 'rgba(255,255,255,.07)' : 'rgba(25,28,30,.08)';
+    const tick = isDark() ? '#a9b8c0' : '#6c7a71';
+    const line = isDark() ? '#00ff9d' : '#006c49';
+
+    if (trendChart) trendChart.destroy();
+    trendChart = new Chart(canvas.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: trendData.labels,
+        datasets: [{
+          label: d.label,
+          data: d.values,
+          borderColor: line,
+          backgroundColor: isDark() ? 'rgba(0,255,157,.08)' : 'rgba(0,108,73,.06)',
+          pointBackgroundColor: isDark() ? '#0d1425' : '#ffffff',
+          pointBorderColor: line,
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          borderWidth: 2.5,
+          tension: .35,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: tick }, grid: { color: grid } },
+          y: { beginAtZero: true, ticks: { color: tick }, grid: { color: grid } }
+        }
+      }
+    });
+  }
+
+  function switchTrendMetric(metric) {
+    currentMetric = metric;
+    setPillActive('metric', metric);
+    renderTrendChart();
+  }
+
+  // ── Init ──
+  renderStatsTable();
+  setPillActive('mode', statMode);
+  setPillActive('metric', currentMetric);
+  renderTrendChart();
+  goToPage('dashboard', 'Player Dashboard');
+</script>
+</body>
+</html>
