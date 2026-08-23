@@ -9,7 +9,7 @@ import { REPORTS as INITIAL_REPORTS, PLAYERS } from '../../data/mockData.js';
 import { formatDate } from '../../utils/format.js';
 import { useToast } from '../../context/ToastContext.jsx';
 
-const TYPE_TONE = { Player: 'primary', Tournament: 'cyan', Development: 'amber' };
+const TYPE_TONE = { Player: 'primary', Training: 'info', Tournament: 'cyan', Performance: 'warn', Development: 'amber' };
 
 export default function CoachReports() {
   const [reports, setReports] = useState(INITIAL_REPORTS);
@@ -33,7 +33,7 @@ export default function CoachReports() {
     <>
       <PageHeader
         title="Reports"
-        subtitle="Player and Development reports for your squad"
+        subtitle="Player, Training, Performance and Development reports for your squad"
         actions={<Button icon="description" onClick={() => setGenOpen(true)}>Generate Report</Button>}
       />
 
@@ -63,6 +63,8 @@ export default function CoachReports() {
           <FormField label="Report Type">
             <Select value={reportType} onChange={(e) => { setReportType(e.target.value); setSubject(PLAYERS[0].name); }}>
               <option>Player</option>
+              <option>Training</option>
+              <option>Performance</option>
               <option>Development</option>
             </Select>
           </FormField>

@@ -46,22 +46,56 @@ export const USERS = [
   ...PLAYERS.map((p, i) => ({ id: `U${String(i + 3).padStart(3, '0')}`, username: p.name.split(' ')[0].toLowerCase() + '.' + p.id.toLowerCase(), name: p.name, role: 'Player', status: p.status })),
 ];
 
+// `status`: 'Completed' matches have a recorded `result`; 'Scheduled' matches
+// are fixtures added from Tournament Management awaiting a result (FR6 correction).
 export const MATCHES = [
-  { id: 'M001', date: '2026-07-05', opponent: 'Coastal Colts CC', venue: 'Central Academy Oval', tournament: 'Academy T20 Trophy', result: 'Win' },
-  { id: 'M002', date: '2026-07-12', opponent: 'Westport Eagles', venue: 'Sunset Sports Complex', tournament: 'Academy T20 Trophy', result: 'Loss' },
-  { id: 'M003', date: '2026-07-19', opponent: 'Silverline Hawks', venue: 'Hilltop Cricket Park', tournament: 'Academy T20 Trophy', result: 'Win' },
-  { id: 'M004', date: '2026-07-26', opponent: 'Harbor City Knights', venue: 'Riverside Stadium', tournament: null, result: 'No Result' },
-  { id: 'M005', date: '2026-08-02', opponent: 'Metro Falcons', venue: 'Central Academy Oval', tournament: 'Academy T20 Trophy', result: 'Win' },
+  { id: 'M001', date: '2026-07-05', opponent: 'Coastal Colts CC', venue: 'Central Academy Oval', tournament: 'Academy T20 Trophy', format: 'T20', status: 'Completed', result: 'Win' },
+  { id: 'M002', date: '2026-07-12', opponent: 'Westport Eagles', venue: 'Sunset Sports Complex', tournament: 'Academy T20 Trophy', format: 'T20', status: 'Completed', result: 'Loss' },
+  { id: 'M003', date: '2026-07-19', opponent: 'Silverline Hawks', venue: 'Hilltop Cricket Park', tournament: 'Academy T20 Trophy', format: 'T20', status: 'Completed', result: 'Win' },
+  { id: 'M004', date: '2026-07-26', opponent: 'Harbor City Knights', venue: 'Riverside Stadium', tournament: null, format: 'T20', status: 'Completed', result: 'No Result' },
+  { id: 'M005', date: '2026-08-02', opponent: 'Metro Falcons', venue: 'Central Academy Oval', tournament: 'Academy T20 Trophy', format: 'T20', status: 'Completed', result: 'Win' },
 ];
 
-// Match_Performance shells for the demo Player (P001) — legal balls stored,
-// not decimal overs. Used by My Match Stats, Match history and trend charts.
+// Match_Performance shells — legal balls stored, not decimal overs. Used by
+// My Match Stats, Player Comparison, Match history and trend charts.
+// One shell per role archetype so role-aware UI (Player > My Match Stats,
+// Coach > Player Comparison) has real data to render, not just P001.
+
+// P001 — Kasun Perera (Batter): batting + fielding only, no bowling.
 export const MATCH_PERFORMANCE_P001 = [
   { matchId: 'M001', runs: 42, ballsFaced: 31, fours: 5, sixes: 1, isOut: true, catches: 1, runOuts: 0 },
   { matchId: 'M002', runs: 18, ballsFaced: 20, fours: 2, sixes: 0, isOut: true, catches: 0, runOuts: 0 },
   { matchId: 'M003', runs: 61, ballsFaced: 39, fours: 7, sixes: 2, isOut: false, catches: 1, runOuts: 1 },
   { matchId: 'M004', runs: 9, ballsFaced: 14, fours: 1, sixes: 0, isOut: true, catches: 0, runOuts: 0 },
   { matchId: 'M005', runs: 55, ballsFaced: 34, fours: 6, sixes: 1, isOut: false, catches: 2, runOuts: 0 },
+];
+
+// P002 — Nuwan Silva (Bowler): bowling + fielding only, no batting.
+// Wickets total (2+1+3+1+2=9) matches the Coach Dashboard's Top Performers entry.
+export const MATCH_PERFORMANCE_P002 = [
+  { matchId: 'M001', legalBalls: 24, runsConceded: 28, wickets: 2, maidens: 0, catches: 1, runOuts: 0 },
+  { matchId: 'M002', legalBalls: 22, runsConceded: 32, wickets: 1, maidens: 0, catches: 0, runOuts: 0 },
+  { matchId: 'M003', legalBalls: 24, runsConceded: 19, wickets: 3, maidens: 1, catches: 1, runOuts: 0 },
+  { matchId: 'M004', legalBalls: 18, runsConceded: 22, wickets: 1, maidens: 0, catches: 0, runOuts: 1 },
+  { matchId: 'M005', legalBalls: 24, runsConceded: 26, wickets: 2, maidens: 0, catches: 1, runOuts: 0 },
+];
+
+// P003 — Dilan Fernando (All-Rounder): batting AND bowling, plus fielding.
+export const MATCH_PERFORMANCE_P003 = [
+  { matchId: 'M001', runs: 24, ballsFaced: 19, fours: 2, sixes: 0, isOut: true, legalBalls: 18, runsConceded: 21, wickets: 1, maidens: 0, catches: 0, runOuts: 0 },
+  { matchId: 'M002', runs: 11, ballsFaced: 10, fours: 1, sixes: 0, isOut: true, legalBalls: 12, runsConceded: 15, wickets: 0, maidens: 0, catches: 1, runOuts: 0 },
+  { matchId: 'M003', runs: 38, ballsFaced: 27, fours: 4, sixes: 1, isOut: false, legalBalls: 24, runsConceded: 17, wickets: 2, maidens: 1, catches: 0, runOuts: 1 },
+  { matchId: 'M004', runs: 6, ballsFaced: 9, fours: 0, sixes: 0, isOut: true, legalBalls: 6, runsConceded: 9, wickets: 0, maidens: 0, catches: 0, runOuts: 0 },
+  { matchId: 'M005', runs: 29, ballsFaced: 22, fours: 3, sixes: 0, isOut: false, legalBalls: 18, runsConceded: 14, wickets: 1, maidens: 0, catches: 1, runOuts: 0 },
+];
+
+// P004 — Sahan Wickramasinghe (Wicketkeeper-Batter): batting + keeping/fielding, no bowling.
+export const MATCH_PERFORMANCE_P004 = [
+  { matchId: 'M001', runs: 15, ballsFaced: 16, fours: 1, sixes: 0, isOut: true, catches: 2, stumpings: 1 },
+  { matchId: 'M002', runs: 33, ballsFaced: 28, fours: 3, sixes: 1, isOut: false, catches: 1, stumpings: 0 },
+  { matchId: 'M003', runs: 8, ballsFaced: 11, fours: 1, sixes: 0, isOut: true, catches: 3, stumpings: 0 },
+  { matchId: 'M004', runs: 21, ballsFaced: 17, fours: 2, sixes: 0, isOut: true, catches: 1, stumpings: 1 },
+  { matchId: 'M005', runs: 40, ballsFaced: 30, fours: 4, sixes: 1, isOut: false, catches: 2, stumpings: 0 },
 ];
 
 export const TRAINING_SESSIONS = [
@@ -130,6 +164,8 @@ export const REPORTS = [
   { id: 'RPT001', type: 'Player', subject: 'Kasun Perera', generatedBy: 'Ravi Jayasinghe', date: '2026-08-10', format: 'PDF', status: 'Ready' },
   { id: 'RPT002', type: 'Tournament', subject: 'Academy T20 Trophy', generatedBy: 'Admin User', date: '2026-08-03', format: 'Excel', status: 'Ready' },
   { id: 'RPT003', type: 'Development', subject: 'Kasun Perera', generatedBy: 'Ravi Jayasinghe', date: '2026-07-28', format: 'PDF', status: 'Ready' },
+  { id: 'RPT004', type: 'Training', subject: 'Kasun Perera', generatedBy: 'Ravi Jayasinghe', date: '2026-08-19', format: 'Excel', status: 'Ready' },
+  { id: 'RPT005', type: 'Performance', subject: 'Nuwan Silva', generatedBy: 'Ravi Jayasinghe', date: '2026-08-20', format: 'PDF', status: 'Ready' },
 ];
 
 export const SCHEDULE_ITEMS = [

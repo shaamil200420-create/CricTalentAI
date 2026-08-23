@@ -3,31 +3,61 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import PageHeader from '../../components/PageHeader.jsx';
 import { Card } from '../../components/Card.jsx';
 import ChartContainer from '../../components/ChartContainer.jsx';
-import { PLAYERS, MATCH_PERFORMANCE_P001, TRAINING_RECORDS_P001, AI_PREDICTIONS_P001 } from '../../data/mockData.js';
-import { strikeRate, formatNumber } from '../../utils/cricket.js';
+import {
+  PLAYERS, MATCH_PERFORMANCE_P001, MATCH_PERFORMANCE_P002,
+  TRAINING_RECORDS_P001, AI_PREDICTIONS_P001,
+} from '../../data/mockData.js';
+import { strikeRate, economyRate, formatNumber } from '../../utils/cricket.js';
 
 const MAX_SELECT = 4;
 
+const EMPTY_METRICS = {
+  battingAvg: null, strikeRate: null,
+  wickets: null, economy: null,
+  fieldingScore: null, catches: null,
+  attendancePct: null, fitness: null, coachRating: null, aiScore: null,
+};
+
+// P001 (Batter) has batting + fielding + training/AI demo data.
+// P002 (Bowler) has bowling + fielding demo data, so Bowling/Fielding rows
+// have something real to compare, not just "No data" for every player.
 function metricsFor(player) {
-  const hasDemoData = player.id === 'P001';
-  if (!hasDemoData) {
-    return { battingAvg: null, strikeRate: null, attendancePct: null, fitness: null, coachRating: null, aiScore: null };
+  if (player.id === 'P001') {
+    const innings = MATCH_PERFORMANCE_P001;
+    const totalRuns = innings.reduce((s, i) => s + i.runs, 0);
+    const totalBalls = innings.reduce((s, i) => s + i.ballsFaced, 0);
+    const dismissals = innings.filter((i) => i.isOut).length || 1;
+    const totalCatches = innings.reduce((s, i) => s + i.catches, 0);
+    const present = TRAINING_RECORDS_P001.filter((r) => r.attendance === 'Present');
+    const attendancePct = (present.length / TRAINING_RECORDS_P001.length) * 100;
+    const fitness = present.length ? present[present.length - 1].fitnessScore : null;
+    const fieldingScores = present.map((r) => r.fieldingScore).filter((v) => v != null);
+    const fieldingScore = fieldingScores.length ? fieldingScores.reduce((a, b) => a + b, 0) / fieldingScores.length : null;
+    const ratings = present.map((r) => r.coachRating).filter((v) => v != null);
+    const coachRating = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null;
+    const aiScore = AI_PREDICTIONS_P001[0]?.score ?? null;
+    return {
+      ...EMPTY_METRICS,
+      battingAvg: totalRuns / dismissals,
+      strikeRate: strikeRate(totalRuns, totalBalls),
+      catches: totalCatches, fieldingScore,
+      attendancePct, fitness, coachRating, aiScore,
+    };
   }
-  const innings = MATCH_PERFORMANCE_P001;
-  const totalRuns = innings.reduce((s, i) => s + i.runs, 0);
-  const totalBalls = innings.reduce((s, i) => s + i.ballsFaced, 0);
-  const dismissals = innings.filter((i) => i.isOut).length || 1;
-  const present = TRAINING_RECORDS_P001.filter((r) => r.attendance === 'Present');
-  const attendancePct = (present.length / TRAINING_RECORDS_P001.length) * 100;
-  const fitness = present.length ? present[present.length - 1].fitnessScore : null;
-  const ratings = present.map((r) => r.coachRating).filter((v) => v != null);
-  const coachRating = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null;
-  const aiScore = AI_PREDICTIONS_P001[0]?.score ?? null;
-  return {
-    battingAvg: totalRuns / dismissals,
-    strikeRate: strikeRate(totalRuns, totalBalls),
-    attendancePct, fitness, coachRating, aiScore,
-  };
+  if (player.id === 'P002') {
+    const spells = MATCH_PERFORMANCE_P002;
+    const totalWickets = spells.reduce((s, i) => s + i.wickets, 0);
+    const totalRunsConceded = spells.reduce((s, i) => s + i.runsConceded, 0);
+    const totalLegalBalls = spells.reduce((s, i) => s + i.legalBalls, 0);
+    const totalCatches = spells.reduce((s, i) => s + i.catches, 0);
+    return {
+      ...EMPTY_METRICS,
+      wickets: totalWickets,
+      economy: economyRate(totalRunsConceded, totalLegalBalls),
+      catches: totalCatches,
+    };
+  }
+  return { ...EMPTY_METRICS };
 }
 
 export default function Comparison() {
@@ -50,7 +80,7 @@ export default function Comparison() {
 
   return (
     <>
-      <PageHeader title="Player Comparison" subtitle="Compare batting, fielding, fitness and AI scores side by side (FR9, up to 4 players)" />
+      <PageHeader title="Player Comparison" subtitle="Compare batting, bowling, fielding, attendance, fitness, coach rating and AI score side by side (FR9, up to 4 players)" />
 
       <Card title="Select Players" style={{ marginBottom: 16 }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -61,7 +91,7 @@ export default function Comparison() {
             </label>
           ))}
         </div>
-        <p className="text-faint" style={{ fontSize: 11.5, marginTop: 10, marginBottom: 0 }}>Select up to {MAX_SELECT} players. Only P001 (Kasun Perera) has demo performance data in Phase 2 — others show "No data (demo)".</p>
+        <p className="text-faint" style={{ fontSize: 11.5, marginTop: 10, marginBottom: 0 }}>Select up to {MAX_SELECT} players. P001 (Kasun Perera, batting/fielding) and P002 (Nuwan Silva, bowling/fielding) have demo performance data in Phase 2 — others show "No data (demo)".</p>
       </Card>
 
       <div className="table-wrap">
@@ -75,6 +105,10 @@ export default function Comparison() {
           <tbody>
             <MetricRow label="Batting Average" rows={rows} pick={(m) => (m.battingAvg == null ? null : formatNumber(m.battingAvg))} />
             <MetricRow label="Strike Rate" rows={rows} pick={(m) => (m.strikeRate == null ? null : formatNumber(m.strikeRate))} />
+            <MetricRow label="Wickets" rows={rows} pick={(m) => (m.wickets == null ? null : m.wickets)} />
+            <MetricRow label="Economy Rate" rows={rows} pick={(m) => (m.economy == null ? null : formatNumber(m.economy))} />
+            <MetricRow label="Fielding Score" rows={rows} pick={(m) => (m.fieldingScore == null ? null : `${formatNumber(m.fieldingScore, 0)} / 100`)} />
+            <MetricRow label="Catches" rows={rows} pick={(m) => (m.catches == null ? null : m.catches)} />
             <MetricRow label="Attendance %" rows={rows} pick={(m) => (m.attendancePct == null ? null : `${formatNumber(m.attendancePct, 0)}%`)} />
             <MetricRow label="Fitness Score" rows={rows} pick={(m) => (m.fitness == null ? null : `${m.fitness} / 100`)} />
             <MetricRow label="Coach Rating" rows={rows} pick={(m) => (m.coachRating == null ? null : `${formatNumber(m.coachRating)} / 10`)} />

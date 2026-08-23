@@ -6,12 +6,15 @@ import { StatusBadge } from '../../components/Badge.jsx';
 import Modal from '../../components/Modal.jsx';
 import Tabs from '../../components/Tabs.jsx';
 import { FormField, Input, Select } from '../../components/FormField.jsx';
-import { TOURNAMENTS as INITIAL_TOURNAMENTS, PLAYERS, MATCHES } from '../../data/mockData.js';
+import { TOURNAMENTS as INITIAL_TOURNAMENTS, PLAYERS, MATCHES as INITIAL_MATCHES } from '../../data/mockData.js';
 import { formatDate } from '../../utils/format.js';
 import { useToast } from '../../context/ToastContext.jsx';
 
+const RESULT_OPTIONS = ['Win', 'Loss', 'No Result'];
+
 export default function TournamentManagement() {
   const [tournaments, setTournaments] = useState(INITIAL_TOURNAMENTS);
+  const [matches, setMatches] = useState(INITIAL_MATCHES);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [detailTarget, setDetailTarget] = useState(null);
@@ -45,6 +48,19 @@ export default function TournamentManagement() {
       const has = t.assignedPlayers.includes(playerId);
       return { ...t, assignedPlayers: has ? t.assignedPlayers.filter((id) => id !== playerId) : [...t.assignedPlayers, playerId] };
     }));
+  };
+
+  const addMatch = (tournamentName, { opponent, date, venue }) => {
+    setMatches((list) => [...list, {
+      id: `M${String(list.length + 1).padStart(3, '0')}`,
+      date, opponent, venue, tournament: tournamentName, format: 'T20', status: 'Scheduled', result: null,
+    }]);
+    showToast('Match added to the tournament (demo only).');
+  };
+
+  const recordResult = (matchId, result) => {
+    setMatches((list) => list.map((m) => (m.id === matchId ? { ...m, result, status: 'Completed' } : m)));
+    showToast('Match result saved (demo only).');
   };
 
   const detail = tournaments.find((t) => t.id === detailTarget?.id);
@@ -89,17 +105,22 @@ export default function TournamentManagement() {
       {detail && (
         <TournamentDetailModal
           tournament={detail}
+          matches={matches}
           onClose={() => setDetailTarget(null)}
           onTogglePlayer={(pid) => togglePlayer(detail.id, pid)}
+          onAddMatch={(payload) => addMatch(detail.name, payload)}
+          onRecordResult={recordResult}
         />
       )}
     </>
   );
 }
 
-function TournamentDetailModal({ tournament, onClose, onTogglePlayer }) {
+function TournamentDetailModal({ tournament, matches, onClose, onTogglePlayer, onAddMatch, onRecordResult }) {
   const [tab, setTab] = useState('players');
-  const relatedMatches = MATCHES.filter((m) => m.tournament === tournament.name);
+  const [addMatchOpen, setAddMatchOpen] = useState(false);
+  const [resultTarget, setResultTarget] = useState(null);
+  const relatedMatches = matches.filter((m) => m.tournament === tournament.name);
 
   return (
     <Modal open onClose={onClose} title={tournament.name} subtitle="T20 · assign players and review match history" wide
@@ -122,26 +143,104 @@ function TournamentDetailModal({ tournament, onClose, onTogglePlayer }) {
           ))}
         </ul>
       ) : (
-        <DataTableInline matches={relatedMatches} />
+        <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+            <Button size="sm" icon="add" onClick={() => setAddMatchOpen(true)}>Add Match</Button>
+          </div>
+          <MatchHistoryTable matches={relatedMatches} onRecordResult={(m) => setResultTarget(m)} />
+        </>
+      )}
+
+      {addMatchOpen && (
+        <AddMatchModal
+          tournamentName={tournament.name}
+          onClose={() => setAddMatchOpen(false)}
+          onSave={(payload) => { onAddMatch(payload); setAddMatchOpen(false); }}
+        />
+      )}
+
+      {resultTarget && (
+        <ResultModal
+          match={resultTarget}
+          onClose={() => setResultTarget(null)}
+          onSave={(result) => { onRecordResult(resultTarget.id, result); setResultTarget(null); }}
+        />
       )}
     </Modal>
   );
 }
 
-function DataTableInline({ matches }) {
+function MatchHistoryTable({ matches, onRecordResult }) {
   if (!matches.length) {
-    return <p className="text-faint" style={{ fontSize: 13 }}>No matches recorded against this tournament yet. Matches are added from the Coach Portal's Match Entry once a game is played.</p>;
+    return <p className="text-faint" style={{ fontSize: 13 }}>No matches added to this tournament yet. Use "Add Match" above to schedule one.</p>;
   }
   return (
     <div className="table-wrap">
       <table className="data-table">
-        <thead><tr><th>Date</th><th>Opponent</th><th>Venue</th><th>Result</th></tr></thead>
+        <thead><tr><th>Date</th><th>Opponent</th><th>Venue</th><th>Status</th><th>Result</th><th></th></tr></thead>
         <tbody>
           {matches.map((m) => (
-            <tr key={m.id}><td>{formatDate(m.date)}</td><td>{m.opponent}</td><td>{m.venue}</td><td><StatusBadge status={m.result} /></td></tr>
+            <tr key={m.id}>
+              <td>{formatDate(m.date)}</td>
+              <td>{m.opponent}</td>
+              <td>{m.venue}</td>
+              <td><StatusBadge status={m.status} /></td>
+              <td>{m.result ? <StatusBadge status={m.result} /> : <span className="text-faint">—</span>}</td>
+              <td style={{ textAlign: 'right' }}>
+                <Button size="sm" variant="secondary" icon={m.result ? 'edit' : 'flag'} onClick={() => onRecordResult(m)}>
+                  {m.result ? 'Edit Result' : 'Record Result'}
+                </Button>
+              </td>
+            </tr>
           ))}
         </tbody>
       </table>
     </div>
+  );
+}
+
+function AddMatchModal({ tournamentName, onClose, onSave }) {
+  const [opponent, setOpponent] = useState('');
+  const [date, setDate] = useState('');
+  const [venue, setVenue] = useState('');
+
+  return (
+    <Modal open onClose={onClose} title="Add Match" subtitle={`${tournamentName} · T20`}
+      footer={<>
+        <Button variant="secondary" onClick={onClose}>Cancel</Button>
+        <Button variant="primary" icon="save" disabled={!opponent || !date || !venue} onClick={() => onSave({ opponent, date, venue })}>Save Match</Button>
+      </>}>
+      <div className="form-grid">
+        <FormField label="Tournament"><Input value={tournamentName} disabled /></FormField>
+        <FormField label="Format"><Select value="T20" disabled><option>T20</option></Select></FormField>
+        <FormField label="Opponent" full><Input value={opponent} onChange={(e) => setOpponent(e.target.value)} placeholder="e.g. Metro Falcons" /></FormField>
+        <FormField label="Match Date"><Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></FormField>
+        <FormField label="Venue"><Input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="e.g. Central Academy Oval" /></FormField>
+      </div>
+      <p className="text-faint" style={{ fontSize: 11.5, marginTop: 4, marginBottom: 0 }}>
+        New matches start as <strong>Scheduled</strong> — use "Record Result" once the match has been played (demo only).
+      </p>
+    </Modal>
+  );
+}
+
+function ResultModal({ match, onClose, onSave }) {
+  const [result, setResult] = useState(match.result || RESULT_OPTIONS[0]);
+
+  return (
+    <Modal open onClose={onClose} title={match.result ? 'Edit Result' : 'Record Result'} subtitle={`${match.opponent} · ${formatDate(match.date)}`}
+      footer={<>
+        <Button variant="secondary" onClick={onClose}>Cancel</Button>
+        <Button variant="primary" icon="save" onClick={() => onSave(result)}>Save Result</Button>
+      </>}>
+      <FormField label="Result">
+        <Select value={result} onChange={(e) => setResult(e.target.value)}>
+          {RESULT_OPTIONS.map((r) => <option key={r} value={r}>{r === 'Win' ? 'Won' : r === 'Loss' ? 'Lost' : 'No Result'}</option>)}
+        </Select>
+      </FormField>
+      <p className="text-faint" style={{ fontSize: 11.5, marginTop: 4, marginBottom: 0 }}>
+        Saving marks this match as <strong>Completed</strong> and updates Tournament History (demo only).
+      </p>
+    </Modal>
   );
 }

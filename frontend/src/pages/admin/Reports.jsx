@@ -9,7 +9,7 @@ import { REPORTS as INITIAL_REPORTS, PLAYERS, TOURNAMENTS } from '../../data/moc
 import { formatDate } from '../../utils/format.js';
 import { useToast } from '../../context/ToastContext.jsx';
 
-const TYPE_TONE = { Player: 'primary', Tournament: 'cyan', Development: 'amber' };
+const TYPE_TONE = { Player: 'primary', Training: 'info', Tournament: 'cyan', Performance: 'warn', Development: 'amber' };
 
 export default function Reports() {
   const [reports, setReports] = useState(INITIAL_REPORTS);
@@ -41,13 +41,13 @@ export default function Reports() {
     <>
       <PageHeader
         title="Reports"
-        subtitle="Player, Tournament and Development reports in one place"
+        subtitle="Player, Training, Tournament, Performance and Development reports in one place"
         actions={<Button icon="description" onClick={() => setGenOpen(true)}>Generate Report</Button>}
       />
 
       <div className="table-toolbar">
         <div className="filter-row">
-          {['All', 'Player', 'Tournament', 'Development'].map((t) => (
+          {['All', 'Player', 'Training', 'Tournament', 'Performance', 'Development'].map((t) => (
             <Button key={t} size="sm" variant={typeFilter === t ? 'primary' : 'secondary'} onClick={() => setTypeFilter(t)}>{t}</Button>
           ))}
         </div>
@@ -73,7 +73,7 @@ export default function Reports() {
         open={genOpen}
         onClose={() => setGenOpen(false)}
         title="Generate Report"
-        subtitle="Player, Tournament and Development report types (Phase 0 correction #6)"
+        subtitle="Player, Training, Tournament, Performance and Development report types (FR18)"
         footer={<>
           <Button variant="secondary" onClick={() => setGenOpen(false)}>Cancel</Button>
           <Button variant="primary" icon="description" onClick={generate}>Generate</Button>
@@ -83,7 +83,9 @@ export default function Reports() {
           <FormField label="Report Type">
             <Select value={reportType} onChange={(e) => { setReportType(e.target.value); setSubject(e.target.value === 'Tournament' ? TOURNAMENTS[0].name : PLAYERS[0].name); }}>
               <option>Player</option>
+              <option>Training</option>
               <option>Tournament</option>
+              <option>Performance</option>
               <option>Development</option>
             </Select>
           </FormField>
