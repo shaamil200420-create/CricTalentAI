@@ -8,6 +8,7 @@ import ThemeToggle from '../../components/ThemeToggle.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { PLAYERS } from '../../data/mockData.js';
+import { login } from '../../services/auth.js';
 
 const DEMO_PORTALS = [
   { role: 'admin', label: 'Admin', icon: 'admin_panel_settings' },
@@ -18,13 +19,28 @@ const DEMO_PORTALS = [
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
-  const { loginAsDemo } = useAuth();
+  const { loginAsDemo, loginWithToken } = useAuth();
   const { showToast } = useToast();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    showToast('Real sign-in isn’t wired up yet — that arrives with FastAPI + JWT in Phase 5. Use a demo portal button below to preview a role.', 'warn');
+    if (!username || !password) {
+      showToast('Enter your username and password.', 'warn');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const user = await login(username, password);
+      loginWithToken(user);
+      showToast(`Welcome back, ${user.name}.`, 'success');
+      navigate(`/${user.role.toLowerCase()}`);
+    } catch (err) {
+      showToast(err.message || 'Sign in failed.', 'error');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleDemo = (role) => {
@@ -37,7 +53,9 @@ export default function Login() {
       <div className="login-hero">
         <div className="login-hero-top">
           <div className="login-brand">
-            <div className="sidebar-brand-mark">CT</div>
+            <div className="sidebar-brand-mark">
+              <Icon name="sports_cricket" size={20} filled style={{ color: 'var(--text-on-primary)' }} />
+            </div>
             <span>CricTalentAI</span>
           </div>
           <ThemeToggle />
@@ -84,7 +102,7 @@ export default function Login() {
             <FormField label="Password" htmlFor="password">
               <PasswordInput id="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
             </FormField>
-            <Button type="submit" variant="primary" block icon="login">Sign In</Button>
+            <Button type="submit" variant="primary" block icon="login" disabled={submitting}>{submitting ? 'Signing in…' : 'Sign In'}</Button>
           </form>
 
           <div className="login-divider"><span>Preview a portal (demo, Phase 2 only)</span></div>

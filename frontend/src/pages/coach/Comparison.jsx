@@ -3,6 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import PageHeader from '../../components/PageHeader.jsx';
 import { Card } from '../../components/Card.jsx';
 import ChartContainer from '../../components/ChartContainer.jsx';
+import { PersonRow } from '../../components/InitialAvatar.jsx';
 import {
   PLAYERS, MATCH_PERFORMANCE_P001, MATCH_PERFORMANCE_P002,
   TRAINING_RECORDS_P001, AI_PREDICTIONS_P001,
@@ -99,7 +100,7 @@ export default function Comparison() {
           <thead>
             <tr>
               <th>Metric</th>
-              {rows.map((r) => <th key={r.player.id}>{r.player.name}</th>)}
+              {rows.map((r) => <th key={r.player.id}><PersonRow name={r.player.name} size={28} /></th>)}
             </tr>
           </thead>
           <tbody>

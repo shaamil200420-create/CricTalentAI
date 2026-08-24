@@ -4,6 +4,7 @@ import { Card } from '../../components/Card.jsx';
 import Button from '../../components/Button.jsx';
 import { Badge } from '../../components/Badge.jsx';
 import { FormField, Input, Select, Textarea } from '../../components/FormField.jsx';
+import PasswordInput from '../../components/PasswordInput.jsx';
 import ThemeToggle from '../../components/ThemeToggle.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 
@@ -29,8 +30,40 @@ export default function Settings() {
   const [notifyDigest, setNotifyDigest] = useState(false);
   const [notes, setNotes] = useState('');
 
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordErrors, setPasswordErrors] = useState({});
+
   const saveProfile = () => showToast('Academy profile saved (demo only — persisted to MySQL in a later phase).');
   const saveNotifications = () => showToast('Notification preferences saved (demo only).');
+
+  const updatePassword = () => {
+    const errors = {};
+    if (!currentPassword) errors.currentPassword = 'Current password is required.';
+    if (!newPassword) errors.newPassword = 'New password is required.';
+    if (!confirmPassword) errors.confirmPassword = 'Please confirm your new password.';
+
+    if (!errors.newPassword && !errors.confirmPassword && newPassword !== confirmPassword) {
+      errors.confirmPassword = 'New password and confirmation do not match.';
+    }
+    if (!errors.newPassword && currentPassword && newPassword === currentPassword) {
+      errors.newPassword = 'New password must be different from your current password.';
+    }
+
+    setPasswordErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
+    // Phase 2 frontend mock only — no account is actually re-authenticated or
+    // updated yet. Real hashing + verification arrives with FastAPI (Phase 5):
+    // React -> FastAPI -> verify current password hash -> validate new
+    // password -> hash new password -> update MySQL.
+    showToast('Password updated successfully.');
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setPasswordErrors({});
+  };
 
   return (
     <>
@@ -61,6 +94,45 @@ export default function Settings() {
               <p className="text-faint" style={{ margin: '2px 0 0', fontSize: 12 }}>Applies across every portal on this device.</p>
             </div>
             <ThemeToggle />
+          </div>
+        </Card>
+
+        <Card title="Change Password" subtitle="Update the password for your own Admin account." style={{ gridColumn: '1 / -1' }}>
+          <div className="form-grid">
+            <FormField label="Current Password" error={passwordErrors.currentPassword}>
+              <PasswordInput
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Enter your current password"
+                autoComplete="current-password"
+                error={passwordErrors.currentPassword}
+              />
+            </FormField>
+            <FormField label="New Password" error={passwordErrors.newPassword}>
+              <PasswordInput
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter a new password"
+                autoComplete="new-password"
+                error={passwordErrors.newPassword}
+              />
+            </FormField>
+            <FormField label="Confirm New Password" error={passwordErrors.confirmPassword}>
+              <PasswordInput
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter the new password"
+                autoComplete="new-password"
+                error={passwordErrors.confirmPassword}
+              />
+            </FormField>
+          </div>
+          <p className="text-faint" style={{ fontSize: 11.5, marginTop: 4, marginBottom: 0 }}>
+            Phase 2 demo only — this does not yet verify or update a real stored password. Real hashing,
+            verification and MySQL persistence arrive with FastAPI (Phase 5).
+          </p>
+          <div style={{ marginTop: 12 }}>
+            <Button variant="primary" icon="lock_reset" onClick={updatePassword}>Update Password</Button>
           </div>
         </Card>
 

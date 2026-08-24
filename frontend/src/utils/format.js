@@ -18,3 +18,14 @@ export function initials(name) {
 export function classNames(...parts) {
   return parts.filter(Boolean).join(' ');
 }
+
+// Returns a NEW array (does not mutate `items`) sorted ascending by the
+// combined date + time fields — earliest first. Used to display schedule
+// items chronologically instead of in raw array order.
+export function sortByDateTime(items, dateKey = 'date', timeKey = 'time') {
+  return [...items].sort((a, b) => {
+    const aTime = new Date(`${a[dateKey]}T${a[timeKey] || '00:00'}`).getTime();
+    const bTime = new Date(`${b[dateKey]}T${b[timeKey] || '00:00'}`).getTime();
+    return aTime - bTime;
+  });
+}

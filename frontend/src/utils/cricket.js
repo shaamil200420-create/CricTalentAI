@@ -59,7 +59,35 @@ export function boundaryRunsValid(runs, fours, sixes) {
   return 4 * (fours || 0) + 6 * (sixes || 0) <= (runs || 0);
 }
 
+/**
+ * Fielding Score — derived automatically from raw fielding events
+ * (Catches, Run Outs, Stumpings) so the Coach never types this value.
+ *
+ * This is NORMAL DERIVED SYSTEM LOGIC (a transparent prototype formula),
+ * NOT a machine-learning model. It may later be reused as an input feature
+ * for the Phase 4/5 analytical/ML components, and the weights below can be
+ * revised if the final project methodology defines different ones.
+ *
+ * Fielding Score = (Catches × 8) + (Run Outs × 10) + (Stumpings × 10)
+ */
+export function fieldingScore(catches, runOuts, stumpings) {
+  const c = Math.max(0, Number(catches) || 0);
+  const r = Math.max(0, Number(runOuts) || 0);
+  const s = Math.max(0, Number(stumpings) || 0);
+  return c * 8 + r * 10 + s * 10;
+}
+
 export const PLAYER_ROLES = ['Batter', 'Bowler', 'All-Rounder', 'Wicketkeeper-Batter'];
+export const BATTING_STYLES = ['Right-hand bat', 'Left-hand bat'];
+export const BOWLING_STYLES = [
+  'Right-arm fast', 'Right-arm medium', 'Right-arm off-break', 'Right-arm leg-break',
+  'Left-arm fast', 'Left-arm medium', 'Left-arm orthodox', 'Left-arm chinaman',
+  'Does not bowl',
+];
+export const COACH_SPECIALIZATIONS = [
+  'Batting', 'Bowling', 'Fielding', 'Wicketkeeping', 'Fitness & Conditioning',
+  'Batting & Fielding', 'Bowling & Fielding', 'All-Round Coaching',
+];
 export const PRACTICE_SCORE_MAX = 100;
 export const COACH_RATING_SCALE = [
   { value: 10, label: '10 — Outstanding' },

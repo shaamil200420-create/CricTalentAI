@@ -1,19 +1,24 @@
 import { createContext, useContext, useState } from 'react';
 import { DEMO_IDENTITIES } from '../data/mockData.js';
+import { logout as clearAuthToken } from '../services/auth.js';
 
 /*
- * TEMPORARY, PHASE 2 ONLY.
- * ------------------------------------------------------------------
- * There is no backend yet, so there is no real authentication. This
- * context only remembers "which portal did the demo Login screen send
- * the visitor to" so the three portals can be previewed and the routes
- * are structured the way real RBAC will slot into during Phase 5.
+ * loginAsDemo/logout below are still the Phase 2 demo-only session used
+ * by the Login page's three "preview a portal" buttons — no password
+ * check, no token, unchanged.
  *
- * It performs NO password check, issues NO token, and must not be
- * mistaken for real security. Real JWT + bcrypt + RBAC replace this
- * entirely in Phase 5 (see services/auth.js).
+ * loginWithToken() is the real counterpart: it's called after a
+ * successful POST /api/auth/login (see services/auth.js + Login.jsx)
+ * and stores the same `session` shape so ProtectedRoute/sidebars don't
+ * need to know which path was used. The JWT itself lives in
+ * sessionStorage via services/api.js's token helpers, not here.
  * ------------------------------------------------------------------
  */
+const ROLE_TITLES = {
+  admin: 'System Administrator',
+  coach: 'Senior Performance Coach',
+  player: 'Player',
+};
 const AuthContext = createContext(null);
 const STORAGE_KEY = 'crictalentai-demo-session';
 
@@ -37,13 +42,29 @@ export function AuthProvider({ children }) {
     try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* ignore */ }
   };
 
+  const loginWithToken = (user) => {
+    // user = { role: 'ADMIN'|'COACH'|'PLAYER', id, name, username } from POST /api/auth/login
+    const role = user.role.toLowerCase();
+    const identity = {
+      name: user.name,
+      role: user.role.charAt(0) + user.role.slice(1).toLowerCase(),
+      title: ROLE_TITLES[role] || '',
+      username: user.username,
+      id: user.id,
+    };
+    const next = { role, identity, demo: false };
+    setSession(next);
+    try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+  };
+
   const logout = () => {
     setSession(null);
+    clearAuthToken();
     try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
   };
 
   return (
-    <AuthContext.Provider value={{ session, loginAsDemo, logout }}>
+    <AuthContext.Provider value={{ session, loginAsDemo, loginWithToken, logout }}>
       {children}
     </AuthContext.Provider>
   );

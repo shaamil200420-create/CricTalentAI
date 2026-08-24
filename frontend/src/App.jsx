@@ -10,7 +10,6 @@ import PlayerLayout from './layouts/PlayerLayout.jsx';
 import Login from './pages/auth/Login.jsx';
 
 import AdminDashboard from './pages/admin/Dashboard.jsx';
-import UserManagement from './pages/admin/UserManagement.jsx';
 import AdminManagement from './pages/admin/AdminManagement.jsx';
 import CoachManagement from './pages/admin/CoachManagement.jsx';
 import PlayerManagement from './pages/admin/PlayerManagement.jsx';
@@ -22,9 +21,9 @@ import AdminSettings from './pages/admin/Settings.jsx';
 import CoachDashboard from './pages/coach/Dashboard.jsx';
 import CoachPlayers from './pages/coach/Players.jsx';
 import MatchEntry from './pages/coach/MatchEntry.jsx';
+import MatchRecords from './pages/coach/MatchRecords.jsx';
 import TrainingEntry from './pages/coach/TrainingEntry.jsx';
-import CoachMatches from './pages/coach/Matches.jsx';
-import CoachTraining from './pages/coach/Training.jsx';
+import CoachScheduleManagement from './pages/coach/ScheduleManagement.jsx';
 import Comparison from './pages/coach/Comparison.jsx';
 import AIPredictions from './pages/coach/AIPredictions.jsx';
 import Recommendations from './pages/coach/Recommendations.jsx';
@@ -58,7 +57,6 @@ export default function App() {
         element={<ProtectedRoute role="admin"><AdminLayout /></ProtectedRoute>}
       >
         <Route index element={<AdminDashboard />} />
-        <Route path="users" element={<UserManagement />} />
         <Route path="admins" element={<AdminManagement />} />
         <Route path="coaches" element={<CoachManagement />} />
         <Route path="players" element={<PlayerManagement />} />
@@ -75,9 +73,9 @@ export default function App() {
         <Route index element={<CoachDashboard />} />
         <Route path="players" element={<CoachPlayers />} />
         <Route path="match-entry" element={<MatchEntry />} />
+        <Route path="match-records" element={<MatchRecords />} />
         <Route path="training-entry" element={<TrainingEntry />} />
-        <Route path="matches" element={<CoachMatches />} />
-        <Route path="training" element={<CoachTraining />} />
+        <Route path="schedules" element={<CoachScheduleManagement />} />
         <Route path="comparison" element={<Comparison />} />
         <Route path="ai-predictions" element={<AIPredictions />} />
         <Route path="recommendations" element={<Recommendations />} />

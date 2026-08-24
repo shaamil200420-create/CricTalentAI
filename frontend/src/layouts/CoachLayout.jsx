@@ -14,9 +14,9 @@ const NAV_GROUPS = [
     label: 'Records',
     items: [
       { to: '/coach/match-entry', icon: 'edit_note', label: 'Match Entry' },
+      { to: '/coach/match-records', icon: 'history_edu', label: 'Match Records' },
       { to: '/coach/training-entry', icon: 'fitness_center', label: 'Training Entry' },
-      { to: '/coach/matches', icon: 'event_note', label: 'Matches' },
-      { to: '/coach/training', icon: 'calendar_month', label: 'Training' },
+      { to: '/coach/schedules', icon: 'calendar_month', label: 'Schedule Management' },
     ],
   },
   {
@@ -47,6 +47,7 @@ export default function CoachLayout() {
       onLogout={() => { logout(); navigate('/login'); }}
       headerTitle="Coach Portal"
       headerSubtitle="Record management & AI-supported coaching"
+      variant="coach"
     />
   );
 }

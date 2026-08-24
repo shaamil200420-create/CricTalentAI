@@ -1,31 +1,98 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PageHeader from '../../components/PageHeader.jsx';
 import Button from '../../components/Button.jsx';
 import { Card } from '../../components/Card.jsx';
 import { FormField, Input, Select, Textarea } from '../../components/FormField.jsx';
-import { PLAYERS, TRAINING_SESSIONS } from '../../data/mockData.js';
 import { COACH_RATING_SCALE, PRACTICE_SCORE_MAX, percentOf, formatPercent } from '../../utils/cricket.js';
+import { formatDate } from '../../utils/format.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { apiRequest } from '../../services/api.js';
 
-const EMPTY = {
-  playerId: PLAYERS[0].id, sessionId: TRAINING_SESSIONS[0].id, attendance: 'Present',
-  drillsAssigned: '', drillsCompleted: '', battingPractice: '', bowlingPractice: '',
-  fieldingScore: '', fitnessScore: '', coachRating: '8', coachNotes: '',
-};
+function buildEmptyForm(playerId, sessionId) {
+  return {
+    playerId: playerId || '', sessionId: sessionId || '', attendance: 'Present',
+    drillsAssigned: '', drillsCompleted: '', battingPractice: '', bowlingPractice: '',
+    fieldingScore: '', fitnessScore: '', coachRating: '8', coachNotes: '',
+  };
+}
 
+// Coach -> Training Entry creates a NEW real Training Record for an
+// existing player + an existing training session, persisted straight to
+// MySQL (POST /training-records) — no temporary React-state-only "saved
+// this session" table anymore; the table below now shows the REAL
+// persisted records for the selected session.
+//
+// Both dropdowns are real, database-backed data, never mock lists:
+//   - Player: GET /players?status=Active — the exact same shared Player
+//     Directory Match Entry uses, never a separate player array.
+//   - Session: GET /schedules (already server-filtered to Training-type
+//     schedules only) — the same shared Training Schedule Admin/Coach
+//     Schedule Management manage. Selecting a session auto-fills its
+//     ID/type/date/time/venue; the Coach never recreates the schedule here.
 export default function TrainingEntry() {
-  const [form, setForm] = useState(EMPTY);
-  const [entries, setEntries] = useState([]);
+  const [players, setPlayers] = useState([]);
+  const [sessions, setSessions] = useState([]);
+  const [form, setForm] = useState(() => buildEmptyForm());
+  const [sessionRecords, setSessionRecords] = useState([]);
+  const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
 
+  useEffect(() => {
+    apiRequest('/players?status=Active')
+      .then((list) => {
+        setPlayers(list);
+        setForm((f) => (f.playerId ? f : { ...f, playerId: list[0]?.id || '' }));
+      })
+      .catch((err) => showToast(err.message, 'error'));
+
+    // Cancelled sessions aren't eligible for a new attendance/training entry.
+    apiRequest('/schedules')
+      .then((list) => {
+        const eligible = list.filter((s) => s.status !== 'Cancelled');
+        setSessions(eligible);
+        setForm((f) => (f.sessionId ? f : { ...f, sessionId: eligible[0]?.id || '' }));
+      })
+      .catch((err) => showToast(err.message, 'error'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const loadSessionRecords = (sessionId) => {
+    if (!sessionId) { setSessionRecords([]); return; }
+    apiRequest(`/training-records/session/${sessionId}`).then(setSessionRecords).catch((err) => showToast(err.message, 'error'));
+  };
+
+  useEffect(() => {
+    loadSessionRecords(form.sessionId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.sessionId]);
+
+  const player = players.find((p) => p.id === form.playerId);
+  const session = sessions.find((s) => s.id === form.sessionId);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const isAbsent = form.attendance === 'Absent';
   const drillPct = percentOf(Number(form.drillsCompleted) || 0, Number(form.drillsAssigned) || 0);
 
-  const submit = () => {
-    setEntries((list) => [{ ...form, id: `E${list.length + 1}` }, ...list]);
-    showToast('Training record saved (demo only — persisted to MySQL Training_Records in Phase 6).');
-    setForm(EMPTY);
+  const submit = async () => {
+    setSaving(true);
+    try {
+      await apiRequest('/training-records', {
+        method: 'POST',
+        body: {
+          playerId: form.playerId, sessionId: form.sessionId, attendance: form.attendance,
+          drillsAssigned: form.drillsAssigned, drillsCompleted: form.drillsCompleted,
+          battingPractice: form.battingPractice, bowlingPractice: form.bowlingPractice,
+          fieldingScore: form.fieldingScore, fitnessScore: form.fitnessScore,
+          coachRating: form.coachRating, notes: form.coachNotes,
+        },
+      });
+      showToast('Training record saved.');
+      setForm((f) => buildEmptyForm(f.playerId, f.sessionId));
+      loadSessionRecords(form.sessionId);
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -34,16 +101,31 @@ export default function TrainingEntry() {
 
       <Card title="Player & Session">
         <div className="form-grid">
-          <FormField label="Player">
+          <FormField label="Player" hint="Active players from the database only.">
             <Select value={form.playerId} onChange={set('playerId')}>
-              {PLAYERS.map((p) => <option key={p.id} value={p.id}>{p.name} ({p.id})</option>)}
+              {!players.length && <option value="">Loading players…</option>}
+              {players.map((p) => <option key={p.id} value={p.id}>{p.name} ({p.id})</option>)}
             </Select>
           </FormField>
-          <FormField label="Session">
+          <FormField label="Player ID" hint="Auto-filled from the saved player profile."><Input disabled value={player?.id ?? ''} /></FormField>
+          <FormField label="Name" hint="Auto-filled from the saved player profile."><Input disabled value={player?.name ?? ''} /></FormField>
+          <FormField label="Age" hint="Auto-filled from the saved player profile."><Input disabled value={player?.age ?? ''} /></FormField>
+          <FormField label="Role" hint="Auto-filled from the saved player profile."><Input disabled value={player?.role ?? ''} /></FormField>
+          <FormField label="Batting Style" hint="Auto-filled from the saved player profile."><Input disabled value={player?.battingStyle ?? ''} /></FormField>
+          <FormField label="Bowling Style" hint="Auto-filled from the saved player profile."><Input disabled value={player?.bowlingStyle ?? ''} /></FormField>
+
+          <FormField label="Session" hint="Existing training schedules only.">
             <Select value={form.sessionId} onChange={set('sessionId')}>
-              {TRAINING_SESSIONS.map((s) => <option key={s.id} value={s.id}>{s.name} — {s.date}</option>)}
+              {!sessions.length && <option value="">Loading sessions…</option>}
+              {sessions.map((s) => <option key={s.id} value={s.id}>{s.title} — {formatDate(s.date)}</option>)}
             </Select>
           </FormField>
+          <FormField label="Session ID" hint="Auto-filled from the selected session."><Input disabled value={session?.id ?? ''} /></FormField>
+          <FormField label="Training Type" hint="Auto-filled from the selected session."><Input disabled value={session?.trainingType ?? ''} /></FormField>
+          <FormField label="Date" hint="Auto-filled from the selected session."><Input disabled value={session ? formatDate(session.date) : ''} /></FormField>
+          <FormField label="Time" hint="Auto-filled from the selected session."><Input disabled value={session?.time ?? ''} /></FormField>
+          <FormField label="Venue" hint="Auto-filled from the selected session."><Input disabled value={session?.venue ?? ''} /></FormField>
+
           <FormField label="Attendance">
             <Select value={form.attendance} onChange={set('attendance')}>
               <option>Present</option>
@@ -82,21 +164,20 @@ export default function TrainingEntry() {
       </Card>
 
       <div style={{ marginTop: 16 }}>
-        <Button variant="primary" icon="save" onClick={submit}>Save Training Record</Button>
+        <Button variant="primary" icon="save" onClick={submit} disabled={saving}>{saving ? 'Saving…' : 'Save Training Record'}</Button>
       </div>
 
-      {!!entries.length && (
-        <Card title="Saved This Session (demo only)" style={{ marginTop: 20 }}>
+      {!!sessionRecords.length && (
+        <Card title="Recorded For This Session" style={{ marginTop: 20 }}>
           <div className="table-wrap">
             <table className="data-table">
-              <thead><tr><th>Player</th><th>Session</th><th>Attendance</th><th>Coach Rating</th></tr></thead>
+              <thead><tr><th>Player</th><th>Attendance</th><th>Coach Rating</th></tr></thead>
               <tbody>
-                {entries.map((e) => (
-                  <tr key={e.id}>
-                    <td>{PLAYERS.find((p) => p.id === e.playerId)?.name}</td>
-                    <td>{TRAINING_SESSIONS.find((s) => s.id === e.sessionId)?.name}</td>
-                    <td>{e.attendance}</td>
-                    <td>{e.attendance === 'Absent' ? '—' : e.coachRating}</td>
+                {sessionRecords.map((r) => (
+                  <tr key={r.id}>
+                    <td>{players.find((p) => p.id === r.playerId)?.name ?? r.playerId}</td>
+                    <td>{r.attendance}</td>
+                    <td>{r.attendance === 'Absent' ? '—' : (r.coachRating ?? '—')}</td>
                   </tr>
                 ))}
               </tbody>

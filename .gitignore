@@ -1,0 +1,42 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node / React
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+dist-ssr/
+*.local
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Secrets — real environment files are never committed. Only the
+# *.example templates (which hold no real values) are safe to track.
+.env
+.env.*
+!.env.example
+!.env.gemini.example
+backend/.env
+backend/.env.gemini
+
+# Editor directories and files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

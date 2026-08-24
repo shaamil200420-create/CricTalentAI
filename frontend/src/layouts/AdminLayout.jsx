@@ -10,7 +10,6 @@ const NAV_GROUPS = [
   {
     label: 'Accounts',
     items: [
-      { to: '/admin/users', icon: 'manage_accounts', label: 'User Management' },
       { to: '/admin/admins', icon: 'admin_panel_settings', label: 'Admin Management' },
       { to: '/admin/coaches', icon: 'sports_cricket', label: 'Coach Management' },
       { to: '/admin/players', icon: 'groups', label: 'Player Management' },
@@ -44,6 +43,9 @@ export default function AdminLayout() {
       onLogout={() => { logout(); navigate('/login'); }}
       headerTitle="Admin Portal"
       headerSubtitle="System administration"
+      statusPill="Admin Access"
+      variant="admin"
+      brandIcon="sports_cricket"
     />
   );
 }

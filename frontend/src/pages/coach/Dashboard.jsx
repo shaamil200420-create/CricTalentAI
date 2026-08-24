@@ -2,6 +2,7 @@ import PageHeader from '../../components/PageHeader.jsx';
 import { StatCard, Card } from '../../components/Card.jsx';
 import Icon from '../../components/Icon.jsx';
 import { Badge } from '../../components/Badge.jsx';
+import { PersonRow } from '../../components/InitialAvatar.jsx';
 import { PLAYERS, SCHEDULE_ITEMS, PERFORMANCE_ALERTS, TOP_PERFORMERS, AI_PREDICTIONS_P001 } from '../../data/mockData.js';
 import { formatDate } from '../../utils/format.js';
 
@@ -27,9 +28,12 @@ export default function CoachDashboard() {
         <Card kicker="Form" title="Top Performers (recent)">
           <ul style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {TOP_PERFORMERS.map((p) => (
-              <li key={p.player + p.metric} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13 }}>
-                <span>{p.player} <span className="text-faint" style={{ fontSize: 11 }}>· {p.metric}</span></span>
-                <span className="mono" style={{ fontWeight: 700 }}>{p.value}</span>
+              <li key={p.player + p.metric} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13, gap: 12 }}>
+                <PersonRow name={p.player} size={32} />
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                  <span className="text-faint" style={{ fontSize: 11 }}>{p.metric}</span>
+                  <span className="mono" style={{ fontWeight: 700 }}>{p.value}</span>
+                </span>
               </li>
             ))}
           </ul>

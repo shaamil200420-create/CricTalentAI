@@ -2,13 +2,15 @@ import { NavLink } from 'react-router-dom';
 import Icon from './Icon.jsx';
 import { initials } from '../utils/format.js';
 
-export default function Sidebar({ portalLabel, navGroups, identity, onLogout, open, onClose }) {
+export default function Sidebar({ portalLabel, navGroups, identity, onLogout, open, onClose, variant, brandIcon }) {
   return (
     <>
       {open && <div className="sidebar-scrim" onClick={onClose} />}
-      <aside className={`sidebar ${open ? 'open' : ''}`} aria-label={`${portalLabel} navigation`}>
+      <aside className={`sidebar ${variant ? `sidebar--${variant}` : ''} ${open ? 'open' : ''}`} aria-label={`${portalLabel} navigation`}>
         <div className="sidebar-brand">
-          <div className="sidebar-brand-mark">CT</div>
+          <div className="sidebar-brand-mark">
+            {brandIcon ? <Icon name={brandIcon} size={20} filled style={{ color: 'var(--text-on-primary)' }} /> : 'CT'}
+          </div>
           <div>
             <div className="sidebar-brand-text">CricTalentAI</div>
             <div className="sidebar-brand-sub">{portalLabel}</div>
@@ -37,7 +39,11 @@ export default function Sidebar({ portalLabel, navGroups, identity, onLogout, op
         ))}
 
         <div className="sidebar-footer">
-          {identity && (
+          {/* Old admin (4).html reference: the sidebar footer shows only
+              Settings/Logout — the account identity block lives in the top
+              header instead (see TopHeader `identity` prop). Kept out of the
+              sidebar for the admin variant to avoid showing it twice. */}
+          {identity && variant !== 'admin' && (
             <div className="identity-chip">
               <div className="identity-avatar">{initials(identity.name)}</div>
               <div>
